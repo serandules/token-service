@@ -6,20 +6,13 @@ var Token = require('token');
 var express = require('express');
 var app = module.exports = express();
 
-var suPass = process.env.SU_PASS;
-
-if (!suPass) {
-    throw 'su password cannot be found. Please specify it using SU_PASS';
-}
-
 app.use(express.json());
 app.use(express.urlencoded());
 
 var MIN_TOKEN_VALIDITY = 40 * 1000;
 
 var su = {
-    email: 'admin@serandives.com',
-    password: suPass
+    email: 'admin@serandives.com'
 };
 
 var sc = 'serandives.com';
@@ -47,10 +40,14 @@ User.findOne({
         ssc(user);
         return;
     }
-    User.create({
-        email: su.email,
-        password: su.password
-    }, function (err, user) {
+
+    var suPass = process.env.SU_PASS;
+    if (!suPass) {
+        throw 'su password cannot be found. Please specify it using SU_PASS';
+    }
+
+    su.password = suPass;
+    User.create(su, function (err, user) {
         if (err) {
             throw err;
         }
