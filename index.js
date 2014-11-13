@@ -1,6 +1,7 @@
 var User = require('user');
 var Client = require('client');
-var Token = require('token');
+var mongoose = require('mongoose');
+var Token = mongoose.model('Token');
 
 var express = require('express');
 var app = module.exports = express();
