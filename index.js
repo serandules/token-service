@@ -75,8 +75,9 @@ app.post('/tokens', function (req, res) {
         email: req.body.username
     }).populate('token').exec(function (err, user) {
         if (err) {
+            console.error(err);
             res.send(500, {
-                error: err
+                error: 'internal server error'
             });
             return;
         }
@@ -139,4 +140,29 @@ app.post('/tokens', function (req, res) {
             });
         });
     });
+});
+
+app.delete('/tokens/:id', function (req, res) {
+    var token = req.params.id;
+    Token.findOne({
+        _id: token
+    })
+        .exec(function (err, token) {
+            if (err) {
+                res.send(500, {
+                    error: 'error while retrieving the token'
+                });
+                return;
+            }
+            if (!token) {
+                res.send(404, {
+                    error: 'specified token cannot be found'
+                });
+                return;
+            }
+            token.remove();
+            res.send(200, {
+                error: false
+            });
+        });
 });
