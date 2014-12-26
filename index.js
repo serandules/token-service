@@ -61,16 +61,7 @@ var expires = function (token) {
     return exin > 0 ? exin : 0;
 };
 
-/**
- * grant_type=password&username=ruchira&password=ruchira
- */
-app.post('/tokens', function (req, res) {
-    if (req.body.grant_type !== 'password') {
-        res.send(400, {
-            error: 'unsupported grant type'
-        });
-        return;
-    }
+var passwordGrant = function (req, res) {
     User.findOne({
         email: req.body.username
     }).populate('token').exec(function (err, user) {
@@ -104,14 +95,14 @@ app.post('/tokens', function (req, res) {
             if (token) {
                 if (expires(token) > MIN_TOKEN_VALIDITY) {
                     res.send({
-                        access_token: token.id,
+                        access_token: token.access,
+                        refresh_token: token.refresh,
                         expires_in: token.validity
                     });
                     return;
                 }
             }
             Token.create({
-                type: 'password',
                 user: user.id,
                 client: sc
             }, function (err, token) {
@@ -133,19 +124,104 @@ app.post('/tokens', function (req, res) {
                         return;
                     }
                     res.send({
-                        access_token: token.id,
+                        access_token: token.access,
+                        refresh_token: token.refresh,
                         expires_in: token.validity
                     });
                 });
             });
         });
     });
+};
+
+
+var refreshGrant = function (req, res) {
+    Token.findOne({
+        refresh: req.body.refresh_token
+    }).exec(function (err, token) {
+        if (err) {
+            console.error(err);
+            res.send(500, {
+                error: 'internal server error'
+            });
+            return;
+        }
+        if (!token) {
+            res.send(401, {
+                error: 'token not authorized'
+            });
+            return;
+        }
+        var expin = expires(token);
+        if (expin === 0) {
+            res.send(401, {
+                error: 'token expired'
+            });
+            return;
+        }
+        if (expin > MIN_TOKEN_VALIDITY) {
+            res.send({
+                access_token: token.access,
+                refresh_token: token.refresh,
+                expires_in: token.validity
+            });
+            return;
+        }
+        var user = token.user.id;
+        Token.create({
+            user: user,
+            client: sc
+        }, function (err, token) {
+            if (err) {
+                res.send(500, {
+                    error: err
+                });
+                return;
+            }
+            User.update({
+                _id: user
+            }, {
+                token: token
+            }, function (err, user) {
+                if (err) {
+                    res.send(500, {
+                        error: err
+                    });
+                    return;
+                }
+                res.send({
+                    access_token: token.access,
+                    refresh_token: token.refresh,
+                    expires_in: token.validity
+                });
+            });
+        });
+    });
+};
+
+/**
+ * grant_type=password&username=ruchira&password=ruchira
+ * grant_type=refresh_token&refresh_token=123456
+ */
+app.post('/tokens', function (req, res) {
+    switch (req.body.grant_type) {
+        case 'password':
+            passwordGrant(req, res);
+            break;
+        case 'refresh_token':
+            refreshGrant(req, res);
+            break;
+        default :
+            res.send(400, {
+                error: 'unsupported grant type'
+            });
+    }
 });
 
 app.delete('/tokens/:id', function (req, res) {
     var token = req.params.id;
     Token.findOne({
-        _id: token
+        access: token
     })
         .exec(function (err, token) {
             if (err) {
