@@ -9,7 +9,8 @@ var app = module.exports = express();
 app.use(express.json());
 app.use(express.urlencoded());
 
-var MIN_TOKEN_VALIDITY = 40 * 1000;
+var MIN_ACCESSIBILITY = 10 * 1000;
+var MIN_REFRESHABILITY = 10 * 1000;
 
 var su = {
     email: 'admin@serandives.com'
@@ -56,11 +57,6 @@ User.findOne({
     });
 });
 
-var expires = function (token) {
-    var exin = token.created.getTime() + token.validity - new Date().getTime();
-    return exin > 0 ? exin : 0;
-};
-
 var passwordGrant = function (req, res) {
     User.findOne({
         email: req.body.username
@@ -91,13 +87,15 @@ var passwordGrant = function (req, res) {
                 });
                 return;
             }
+            var expin;
             var token = user.token;
             if (token) {
-                if (expires(token) > MIN_TOKEN_VALIDITY) {
+                expin = token.accessibility();
+                if (expin > MIN_ACCESSIBILITY) {
                     res.send({
                         access_token: token.access,
                         refresh_token: token.refresh,
-                        expires_in: token.validity
+                        expires_in: expin
                     });
                     return;
                 }
@@ -126,7 +124,7 @@ var passwordGrant = function (req, res) {
                     res.send({
                         access_token: token.access,
                         refresh_token: token.refresh,
-                        expires_in: token.validity
+                        expires_in: token.accessible
                     });
                 });
             });
@@ -152,22 +150,22 @@ var refreshGrant = function (req, res) {
             });
             return;
         }
-        var expin = expires(token);
+        var expin = token.accessibility();
         if (expin === 0) {
             res.send(401, {
                 error: 'token expired'
             });
             return;
         }
-        if (expin > MIN_TOKEN_VALIDITY) {
+        if (expin > MIN_REFRESHABILITY) {
             res.send({
                 access_token: token.access,
                 refresh_token: token.refresh,
-                expires_in: token.validity
+                expires_in: expin
             });
             return;
         }
-        var user = token.user.id;
+        var user = token.user;
         Token.create({
             user: user,
             client: sc
@@ -192,7 +190,7 @@ var refreshGrant = function (req, res) {
                 res.send({
                     access_token: token.access,
                     refresh_token: token.refresh,
-                    expires_in: token.validity
+                    expires_in: token.accessible
                 });
             });
         });
