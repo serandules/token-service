@@ -9,8 +9,7 @@ var app = module.exports = express();
 app.use(express.json());
 app.use(express.urlencoded());
 
-var MIN_ACCESSIBILITY = 10 * 1000;
-var MIN_REFRESHABILITY = 10 * 1000;
+var MIN_ACCESSIBILITY = 6 * 1000;
 
 var su = {
     email: 'admin@serandives.com'
@@ -150,14 +149,15 @@ var refreshGrant = function (req, res) {
             });
             return;
         }
-        var expin = token.accessibility();
+        var expin = token.refreshability();
         if (expin === 0) {
             res.send(401, {
-                error: 'token expired'
+                error: 'refresh token expired'
             });
             return;
         }
-        if (expin > MIN_REFRESHABILITY) {
+        expin = token.accessibility();
+        if (expin > MIN_ACCESSIBILITY) {
             res.send({
                 access_token: token.access,
                 refresh_token: token.refresh,
