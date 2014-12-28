@@ -9,7 +9,7 @@ var app = module.exports = express();
 app.use(express.json());
 app.use(express.urlencoded());
 
-var MIN_ACCESSIBILITY = 6 * 1000;
+var MIN_ACCESSIBILITY = 20 * 1000;
 
 var su = {
     email: 'admin@serandives.com'
