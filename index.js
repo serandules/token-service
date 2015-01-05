@@ -1,3 +1,4 @@
+var debug = require('debug')('serandules-token-service');
 var User = require('user');
 var Client = require('client');
 var mongoose = require('mongoose');
