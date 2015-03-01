@@ -1,4 +1,4 @@
-var debug = require('debug')('serandules:token-service');
+var log = require('logger')('token-service:index');
 var User = require('user');
 var Client = require('client');
 var mongoose = require('mongoose');
@@ -6,9 +6,6 @@ var Token = require('token');
 
 var express = require('express');
 var app = module.exports = express();
-
-app.use(express.json());
-app.use(express.urlencoded());
 
 var MIN_ACCESSIBILITY = 20 * 1000;
 
@@ -63,26 +60,26 @@ var passwordGrant = function (req, res) {
     }).populate('token').exec(function (err, user) {
         if (err) {
             console.error(err);
-            res.send(500, {
+            res.status(500).send({
                 error: 'internal server error'
             });
             return;
         }
         if (!user) {
-            res.send(401, {
+            res.status(401).send({
                 error: 'user not authorized'
             });
             return;
         }
         user.auth(req.body.password, function (err, auth) {
             if (err) {
-                res.send(500, {
+                res.status(500).send({
                     error: err
                 });
                 return;
             }
             if (!auth) {
-                res.send(401, {
+                res.status(401).send({
                     error: 'user not authorized'
                 });
                 return;
@@ -105,7 +102,7 @@ var passwordGrant = function (req, res) {
                 client: sc
             }, function (err, token) {
                 if (err) {
-                    res.send(500, {
+                    res.status(500).send({
                         error: err
                     });
                     return;
@@ -116,7 +113,7 @@ var passwordGrant = function (req, res) {
                     token: token
                 }, function (err, user) {
                     if (err) {
-                        res.send(500, {
+                        res.status(500).send({
                             error: err
                         });
                         return;
@@ -138,21 +135,20 @@ var refreshGrant = function (req, res) {
         refresh: req.body.refresh_token
     }).exec(function (err, token) {
         if (err) {
-            console.error(err);
-            res.send(500, {
+            res.status(500).send({
                 error: 'internal server error'
             });
             return;
         }
         if (!token) {
-            res.send(401, {
+            res.status(401).send({
                 error: 'token not authorized'
             });
             return;
         }
         var expin = token.refreshability();
         if (expin === 0) {
-            res.send(401, {
+            res.status(401).send({
                 error: 'refresh token expired'
             });
             return;
@@ -172,7 +168,7 @@ var refreshGrant = function (req, res) {
             client: sc
         }, function (err, token) {
             if (err) {
-                res.send(500, {
+                res.status(500).send({
                     error: err
                 });
                 return;
@@ -183,7 +179,7 @@ var refreshGrant = function (req, res) {
                 token: token
             }, function (err, user) {
                 if (err) {
-                    res.send(500, {
+                    res.status(500).send({
                         error: err
                     });
                     return;
@@ -211,7 +207,7 @@ app.post('/tokens', function (req, res) {
             refreshGrant(req, res);
             break;
         default :
-            res.send(400, {
+            res.status(400).send({
                 error: 'unsupported grant type'
             });
     }
@@ -224,19 +220,19 @@ app.delete('/tokens/:id', function (req, res) {
     })
         .exec(function (err, token) {
             if (err) {
-                res.send(500, {
+                res.status(500).send({
                     error: 'error while retrieving the token'
                 });
                 return;
             }
             if (!token) {
-                res.send(404, {
+                res.status(404).send({
                     error: 'specified token cannot be found'
                 });
                 return;
             }
             token.remove();
-            res.send(200, {
+            res.status(200).send({
                 error: false
             });
         });
