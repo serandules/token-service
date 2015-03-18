@@ -5,7 +5,9 @@ var mongoose = require('mongoose');
 var Token = require('token');
 
 var express = require('express');
-var app = module.exports = express();
+var router = express.Router();
+
+module.exports = router;
 
 var MIN_ACCESSIBILITY = 20 * 1000;
 
@@ -198,7 +200,7 @@ var refreshGrant = function (req, res) {
  * grant_type=password&username=ruchira&password=ruchira
  * grant_type=refresh_token&refresh_token=123456
  */
-app.post('/tokens', function (req, res) {
+router.post('/tokens', function (req, res) {
     switch (req.body.grant_type) {
         case 'password':
             passwordGrant(req, res);
@@ -213,7 +215,7 @@ app.post('/tokens', function (req, res) {
     }
 });
 
-app.delete('/tokens/:id', function (req, res) {
+router.delete('/tokens/:id', function (req, res) {
     var token = req.params.id;
     Token.findOne({
         access: token
