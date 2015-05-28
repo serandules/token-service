@@ -1,4 +1,4 @@
-var log = require('logger')('token-service:index');
+var log = require('logger')('token-service');
 var User = require('user');
 var Client = require('client');
 var mongoose = require('mongoose');
