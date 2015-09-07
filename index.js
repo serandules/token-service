@@ -47,7 +47,18 @@ User.findOne({
     }
 
     su.password = suPass;
-    User.create(su, function (err, user) {
+    su.permissions = {
+        '*': {
+            '': ['*']
+        }
+    };
+    User.findOneAndUpdate({
+        email: su.email
+    }, {
+        $setOnInsert: su
+    }, {
+        upsert: true
+    }, function (err, user) {
         if (err) {
             throw err;
         }
