@@ -1,7 +1,6 @@
 var log = require('logger')('token-service');
 var User = require('user');
 var Client = require('client');
-var mongoose = require('mongoose');
 var Token = require('token');
 
 var express = require('express');
@@ -11,66 +10,66 @@ module.exports = router;
 
 var MIN_ACCESSIBILITY = 20 * 1000;
 
-var su = {
-    email: 'admin@serandives.com'
-};
-
-var sc = 'serandives.com';
-
-var ssc = function (user) {
-    Client.create({
-        name: sc,
-        user: user
-    }, function (err, client) {
+var sendToken = function (req, res, client, user) {
+    Token.findOne({
+        user: user,
+        client: client
+    }, function (err, token) {
         if (err) {
-            throw err;
+            console.error(err);
+            res.status(500).send({
+                error: 'internal server error'
+            });
+            return;
         }
-        sc = client;
+        var expires;
+        if (token) {
+            expires = token.accessibility();
+            if (expires > MIN_ACCESSIBILITY) {
+                res.send({
+                    access_token: token.access,
+                    refresh_token: token.refresh,
+                    expires_in: expires
+                });
+                return;
+            }
+        }
+
+        Token.create({
+            user: user,
+            client: client
+        }, function (err, token) {
+            if (err) {
+                res.status(500).send({
+                    error: err
+                });
+                return;
+            }
+            User.update({
+                _id: user.id
+            }, {
+                token: token
+            }, function (err, user) {
+                if (err) {
+                    res.status(500).send({
+                        error: err
+                    });
+                    return;
+                }
+                res.send({
+                    access_token: token.access,
+                    refresh_token: token.refresh,
+                    expires_in: token.accessible
+                });
+            });
+        });
     });
 };
-
-User.findOne({
-    email: su.email
-}).exec(function (err, user) {
-    if (err) {
-        throw err;
-    }
-    if (user) {
-        su = user;
-        ssc(user);
-        return;
-    }
-
-    var suPass = process.env.SU_PASS;
-    if (!suPass) {
-        throw 'su password cannot be found. Please specify it using SU_PASS';
-    }
-
-    su.password = suPass;
-    su.permissions = {
-        '*': {
-            '': ['*']
-        }
-    };
-    User.findOneAndUpdate({
-        email: su.email
-    }, {
-        $setOnInsert: su
-    }, {
-        upsert: true
-    }, function (err, user) {
-        if (err) {
-            throw err;
-        }
-        su = user;
-        ssc(user);
-    });
-});
 
 var passwordGrant = function (req, res) {
     User.findOne({
         email: req.body.username
-    }).populate('token').exec(function (err, user) {
+    }).populate('tokens').exec(function (err, user) {
         if (err) {
             console.error(err);
             res.status(500).send({
@@ -97,46 +96,23 @@ var passwordGrant = function (req, res) {
                 });
                 return;
             }
-            var expin;
-            var token = user.token;
-            if (token) {
-                expin = token.accessibility();
-                if (expin > MIN_ACCESSIBILITY) {
-                    res.send({
-                        access_token: token.access,
-                        refresh_token: token.refresh,
-                        expires_in: expin
-                    });
-                    return;
-                }
-            }
-            Token.create({
-                user: user.id,
-                client: sc
-            }, function (err, token) {
+            Client.findOne({
+                id: req.body.client_id
+            }, function (err, client) {
                 if (err) {
+                    console.error(err);
                     res.status(500).send({
-                        error: err
+                        error: 'internal server error'
                     });
                     return;
                 }
-                User.update({
-                    _id: user.id
-                }, {
-                    token: token
-                }, function (err, user) {
-                    if (err) {
-                        res.status(500).send({
-                            error: err
-                        });
-                        return;
-                    }
-                    res.send({
-                        access_token: token.access,
-                        refresh_token: token.refresh,
-                        expires_in: token.accessible
+                if (!client) {
+                    res.status(404).send({
+                        error: 'client id not found'
                     });
-                });
+                    return;
+                }
+                sendToken(req, res, client, user);
             });
         });
     });
@@ -176,9 +152,10 @@ var refreshGrant = function (req, res) {
             return;
         }
         var user = token.user;
+        var client = token.client;
         Token.create({
             user: user,
-            client: sc
+            client: client
         }, function (err, token) {
             if (err) {
                 res.status(500).send({
