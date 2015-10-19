@@ -1,4 +1,5 @@
 var log = require('logger')('token-service');
+var permission = require('permission');
 var User = require('user');
 var Client = require('client');
 var Token = require('token');
@@ -12,11 +13,11 @@ var MIN_ACCESSIBILITY = 20 * 1000;
 
 var sendToken = function (req, res, client, user) {
     Token.findOne({
-        user: user,
-        client: client
+        user: user.id,
+        client: client.id
     }, function (err, token) {
         if (err) {
-            console.error(err);
+            log.error(err);
             res.status(500).send({
                 error: 'internal server error'
             });
@@ -36,12 +37,13 @@ var sendToken = function (req, res, client, user) {
         }
 
         Token.create({
-            user: user,
-            client: client
+            user: user.id,
+            client: client.id
         }, function (err, token) {
             if (err) {
+                log.error(err);
                 res.status(500).send({
-                    error: err
+                    error: 'internal server error'
                 });
                 return;
             }
@@ -51,12 +53,14 @@ var sendToken = function (req, res, client, user) {
                 token: token
             }, function (err, user) {
                 if (err) {
+                    log.error(err);
                     res.status(500).send({
-                        error: err
+                        error: 'internal server error'
                     });
                     return;
                 }
                 res.send({
+                    id: token.id,
                     access_token: token.access,
                     refresh_token: token.refresh,
                     expires_in: token.accessible
@@ -71,7 +75,7 @@ var passwordGrant = function (req, res) {
         email: req.body.username
     }).populate('tokens').exec(function (err, user) {
         if (err) {
-            console.error(err);
+            log.error(err);
             res.status(500).send({
                 error: 'internal server error'
             });
@@ -85,8 +89,9 @@ var passwordGrant = function (req, res) {
         }
         user.auth(req.body.password, function (err, auth) {
             if (err) {
+                log.error(err);
                 res.status(500).send({
-                    error: err
+                    error: 'internal server error'
                 });
                 return;
             }
@@ -100,7 +105,7 @@ var passwordGrant = function (req, res) {
                 id: req.body.client_id
             }, function (err, client) {
                 if (err) {
-                    console.error(err);
+                    log.error(err);
                     res.status(500).send({
                         error: 'internal server error'
                     });
@@ -118,71 +123,91 @@ var passwordGrant = function (req, res) {
     });
 };
 
-
 var refreshGrant = function (req, res) {
     Token.findOne({
         refresh: req.body.refresh_token
-    }).exec(function (err, token) {
-        if (err) {
-            res.status(500).send({
-                error: 'internal server error'
-            });
-            return;
-        }
-        if (!token) {
-            res.status(401).send({
-                error: 'token not authorized'
-            });
-            return;
-        }
-        var expin = token.refreshability();
-        if (expin === 0) {
-            res.status(401).send({
-                error: 'refresh token expired'
-            });
-            return;
-        }
-        expin = token.accessibility();
-        if (expin > MIN_ACCESSIBILITY) {
-            res.send({
-                access_token: token.access,
-                refresh_token: token.refresh,
-                expires_in: expin
-            });
-            return;
-        }
-        var user = token.user;
-        var client = token.client;
-        Token.create({
-            user: user,
-            client: client
-        }, function (err, token) {
+    }).populate('client')
+        .exec(function (err, token) {
             if (err) {
+                log.error(err);
                 res.status(500).send({
-                    error: err
+                    error: 'internal server error'
                 });
                 return;
             }
-            User.update({
-                _id: user
-            }, {
-                token: token
-            }, function (err, user) {
-                if (err) {
-                    res.status(500).send({
-                        error: err
-                    });
-                    return;
-                }
+            if (!token) {
+                res.status(401).send({
+                    error: 'token not authorized'
+                });
+                return;
+            }
+            var expin = token.refreshability();
+            if (expin === 0) {
+                res.status(401).send({
+                    error: 'refresh token expired'
+                });
+                return;
+            }
+            expin = token.accessibility();
+            if (expin > MIN_ACCESSIBILITY) {
                 res.send({
                     access_token: token.access,
                     refresh_token: token.refresh,
-                    expires_in: token.accessible
+                    expires_in: expin
+                });
+                return;
+            }
+            var user = token.user;
+            var client = token.client;
+            Token.create({
+                user: user.id,
+                client: client.id
+            }, function (err, token) {
+                if (err) {
+                    log.error(err);
+                    res.status(500).send({
+                        error: 'internal server error'
+                    });
+                    return;
+                }
+                User.update({
+                    _id: user.id
+                }, {
+                    token: token
+                }, function (err, user) {
+                    if (err) {
+                        log.error(err);
+                        res.status(500).send({
+                            error: 'internal server error'
+                        });
+                        return;
+                    }
+                    res.send({
+                        access_token: token.access,
+                        refresh_token: token.refresh,
+                        expires_in: token.accessible
+                    });
                 });
             });
         });
-    });
 };
+
+router.get('/tokens/:id', function (req, res) {
+    var token = req.token;
+    if (!token) {
+        res.status(404).send({
+            error: 'specified token cannot be found'
+        });
+        return;
+    }
+    if (!token.can('tokens:' + req.params.id, 'read', token)) {
+        res.status(401).send({
+            error: 'unauthorized access for token'
+        });
+        return;
+    }
+    res.send(permission.merge(token.has, token.client.has, token.user.has));
+});
 
 /**
  * grant_type=password&username=ruchira&password=ruchira

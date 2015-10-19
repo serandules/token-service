@@ -9,7 +9,9 @@
     "dependencies": {
         "mongoose": "4.*",
         "express": "4.*",
+        "merge": "1.2.0",
         "logger": "serandules/logger#master",
+        "permission": "serandules/permission#master",
         "user": "serandules/user#master",
         "client": "serandules/client#master",
         "token": "serandules/token#master"
