@@ -102,7 +102,7 @@ var passwordGrant = function (req, res) {
                 return;
             }
             Client.findOne({
-                id: req.body.client_id
+                _id: req.body.client_id
             }, function (err, client) {
                 if (err) {
                     log.error(err);
