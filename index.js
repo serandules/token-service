@@ -112,7 +112,7 @@ var passwordGrant = function (req, res) {
                     return;
                 }
                 if (!client) {
-                    res.status(404).send({
+                    res.status(400).send({
                         error: 'client id not found'
                     });
                     return;
