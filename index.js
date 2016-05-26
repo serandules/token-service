@@ -32,12 +32,12 @@ Client.findOne({
         throw err;
     }
     if (!client) {
-        throw new Error('no serandives client found in the database')
+        throw new Error('no serandives client found in the database');
     }
     var serandives = context.serandives;
-    serandives.id = client.id
-    serandives.secret = client.secret
-})
+    serandives.id = client.id;
+    serandives.secret = client.secret;
+});
 
 agent.config('facebook', function (value) {
     var app = value.app;
@@ -45,6 +45,27 @@ agent.config('facebook', function (value) {
     facebook.id = app.id;
     facebook.secret = app.secret;
 });
+
+var refreshError = function (err, req, res) {
+    var serand = req.serand;
+    var code = err.code;
+    if (code === 11000) {
+        // cannot acquire lock
+        serand.refreshed = serand.refreshed || 0;
+        if (serand.refreshed < 4) {
+            serand.refreshed++
+            return setTimeout(refreshGrant, 500, req, res);
+        }
+        res.status(403).send({
+            error: 'another token refresh is pending'
+        });
+        return;
+    }
+    log.error(err);
+    res.status(500).send({
+        error: 'internal server error'
+    });
+}
 
 var sendToken = function (clientId, res, user) {
     Client.findOne({
@@ -97,24 +118,11 @@ var sendToken = function (clientId, res, user) {
                     });
                     return;
                 }
-                User.update({
-                    _id: user.id
-                }, {
-                    token: token
-                }, function (err, user) {
-                    if (err) {
-                        log.error(err);
-                        res.status(500).send({
-                            error: 'internal server error'
-                        });
-                        return;
-                    }
-                    res.send({
-                        id: token.id,
-                        access_token: token.access,
-                        refresh_token: token.refresh,
-                        expires_in: token.accessible
-                    });
+                res.send({
+                    id: token.id,
+                    access_token: token.access,
+                    refresh_token: token.refresh,
+                    expires_in: token.accessible
                 });
             });
         });
@@ -157,7 +165,7 @@ var passwordGrant = function (req, res) {
     });
 };
 
-var refreshGrant = function (req, res) {
+var sendRefreshToken = function (req, res, done) {
     Token.findOne({
         refresh: req.body.refresh_token
     }).populate('client')
@@ -167,20 +175,20 @@ var refreshGrant = function (req, res) {
                 res.status(500).send({
                     error: 'internal server error'
                 });
-                return;
+                return done();
             }
             if (!token) {
                 res.status(401).send({
                     error: 'token not authorized'
                 });
-                return;
+                return done();
             }
             var expin = token.refreshability();
             if (expin === 0) {
                 res.status(401).send({
                     error: 'refresh token expired'
                 });
-                return;
+                return done();
             }
             expin = token.accessibility();
             if (expin > MIN_ACCESSIBILITY) {
@@ -189,41 +197,53 @@ var refreshGrant = function (req, res) {
                     refresh_token: token.refresh,
                     expires_in: expin
                 });
-                return;
+                return done();
             }
-            var user = token.user;
-            var client = token.client;
-            Token.create({
-                user: user.id,
-                client: client.id
-            }, function (err, token) {
+            Token.refresh(token.id, function (err) {
+                var code
                 if (err) {
+                    code = err.code;
+                    if (code === 11000) {
+                        // since a pending retry exists, it will be retried
+                        return done(err);
+                    }
                     log.error(err);
                     res.status(500).send({
                         error: 'internal server error'
                     });
-                    return;
+                    return done()
                 }
-                User.update({
-                    _id: user.id
-                }, {
-                    token: token
-                }, function (err, user) {
+                Token.findOne({
+                    _id: token.id
+                }, function (err, token) {
                     if (err) {
                         log.error(err);
                         res.status(500).send({
                             error: 'internal server error'
                         });
-                        return;
+                        return done();
                     }
                     res.send({
                         access_token: token.access,
                         refresh_token: token.refresh,
                         expires_in: token.accessible
                     });
+                    done()
                 });
             });
         });
+};
+
+var refreshGrant = function (req, res) {
+    async.retry({times: 4, interval: 500}, function (tried) {
+        sendRefreshToken(req, res, tried)
+    }, function (err) {
+        if (err) {
+            res.status(403).send({
+                error: 'another token refresh is pending'
+            });
+        }
+    })
 };
 
 var facebookGrant = function (req, res) {
