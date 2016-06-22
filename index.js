@@ -2,11 +2,11 @@ var log = require('logger')('token-service');
 var request = require('request');
 var async = require('async');
 var url = require('url');
-var agent = require('hub-agent');
 var permission = require('permission');
 var User = require('user');
 var Client = require('client');
 var Token = require('token');
+var Config = require('config');
 
 var express = require('express');
 var router = express.Router();
@@ -39,8 +39,17 @@ Client.findOne({
     serandives.secret = client.secret;
 });
 
-agent.config('facebook', function (value) {
-    var app = value.app;
+Config.findOne({
+    name: 'facebook'
+}, function (err, config) {
+    if (err) {
+        throw err;
+    }
+    if (!config) {
+        throw new Error('no facebook config found in the database');
+    }
+    config = JSON.parse(config.value);
+    var app = config.app;
     var facebook = context.facebook;
     facebook.id = app.id;
     facebook.secret = app.secret;
