@@ -2,6 +2,7 @@ var log = require('logger')('token-service');
 var request = require('request');
 var async = require('async');
 var url = require('url');
+var utils = require('utils');
 var permission = require('permission');
 var User = require('user');
 var Client = require('client');
@@ -15,7 +16,7 @@ module.exports = router;
 
 var MIN_ACCESSIBILITY = 20 * 1000;
 
-var REDIRECT_URI = 'https://accounts.serandives.com/auth/oauth';
+var REDIRECT_URI = utils.resolve('accounts://auth/oauth');
 
 var context = {
     serandives: {},
