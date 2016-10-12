@@ -66,15 +66,17 @@ var refreshError = function (err, req, res) {
             serand.refreshed++
             return setTimeout(refreshGrant, 500, req, res);
         }
-        res.status(403).send({
-            error: 'another token refresh is pending'
-        });
+        res.status(409).send([{
+            code: 409,
+            message: 'Conflict'
+        }]);
         return;
     }
     log.error(err);
-    res.status(500).send({
-        error: 'internal server error'
-    });
+    res.status(500).send([{
+        code: 500,
+        message: 'Internal Server Error'
+    }]);
 }
 
 var sendToken = function (clientId, res, user) {
@@ -83,15 +85,17 @@ var sendToken = function (clientId, res, user) {
     }, function (err, client) {
         if (err) {
             log.error(err);
-            res.status(500).send({
-                error: 'internal server error'
-            });
+            res.status(500).send([{
+                code: 500,
+                message: 'Internal Server Error'
+            }]);
             return;
         }
         if (!client) {
-            res.status(400).send({
-                error: 'client id not found'
-            });
+            res.status(401).send([{
+                code: 401,
+                message: 'Unauthorized'
+            }]);
             return;
         }
         Token.findOne({
@@ -100,9 +104,10 @@ var sendToken = function (clientId, res, user) {
         }, function (err, token) {
             if (err) {
                 log.error(err);
-                res.status(500).send({
-                    error: 'internal server error'
-                });
+                res.status(500).send([{
+                    code: 500,
+                    message: 'Internal Server Error'
+                }]);
                 return;
             }
             var expires;
@@ -123,9 +128,10 @@ var sendToken = function (clientId, res, user) {
             }, function (err, token) {
                 if (err) {
                     log.error(err);
-                    res.status(500).send({
-                        error: 'internal server error'
-                    });
+                    res.status(500).send([{
+                        code: 500,
+                        message: 'Internal Server Error'
+                    }]);
                     return;
                 }
                 res.send({
@@ -145,29 +151,33 @@ var passwordGrant = function (req, res) {
     }).populate('tokens').exec(function (err, user) {
         if (err) {
             log.error(err);
-            res.status(500).send({
-                error: 'internal server error'
-            });
+            res.status(500).send([{
+                code: 500,
+                message: 'Internal Server Error'
+            }]);
             return;
         }
         if (!user) {
-            res.status(401).send({
-                error: 'user not authorized'
-            });
+            res.status(401).send([{
+                code: 401,
+                message: 'Unauthorized'
+            }]);
             return;
         }
         user.auth(req.body.password, function (err, auth) {
             if (err) {
                 log.error(err);
-                res.status(500).send({
-                    error: 'internal server error'
-                });
+                res.status(500).send([{
+                    code: 500,
+                    message: 'Internal Server Error'
+                }]);
                 return;
             }
             if (!auth) {
-                res.status(401).send({
-                    error: 'user not authorized'
-                });
+                res.status(401).send([{
+                    code: 401,
+                    message: 'Unauthorized'
+                }]);
                 return;
             }
             sendToken(req.body.client_id, res, user);
@@ -182,22 +192,25 @@ var sendRefreshToken = function (req, res, done) {
         .exec(function (err, token) {
             if (err) {
                 log.error(err);
-                res.status(500).send({
-                    error: 'internal server error'
-                });
+                res.status(500).send([{
+                    code: 500,
+                    message: 'Internal Server Error'
+                }]);
                 return done();
             }
             if (!token) {
-                res.status(401).send({
-                    error: 'token not authorized'
-                });
+                res.status(401).send([{
+                    code: 401,
+                    message: 'Unauthorized'
+                }]);
                 return done();
             }
             var expin = token.refreshability();
             if (expin === 0) {
-                res.status(401).send({
-                    error: 'refresh token expired'
-                });
+                res.status(401).send([{
+                    code: 401,
+                    message: 'Unauthorized'
+                }]);
                 return done();
             }
             expin = token.accessibility();
@@ -218,9 +231,10 @@ var sendRefreshToken = function (req, res, done) {
                         return done(err);
                     }
                     log.error(err);
-                    res.status(500).send({
-                        error: 'internal server error'
-                    });
+                    res.status(500).send([{
+                        code: 500,
+                        message: 'Internal Server Error'
+                    }]);
                     return done()
                 }
                 Token.findOne({
@@ -228,9 +242,10 @@ var sendRefreshToken = function (req, res, done) {
                 }, function (err, token) {
                     if (err) {
                         log.error(err);
-                        res.status(500).send({
-                            error: 'internal server error'
-                        });
+                        res.status(500).send([{
+                            code: 500,
+                            message: 'Internal Server Error'
+                        }]);
                         return done();
                     }
                     res.send({
@@ -249,9 +264,10 @@ var refreshGrant = function (req, res) {
         sendRefreshToken(req, res, tried)
     }, function (err) {
         if (err) {
-            res.status(403).send({
-                error: 'another token refresh is pending'
-            });
+            res.status(409).send([{
+                code: 409,
+                message: 'Conflict'
+            }]);
         }
     })
 };
@@ -271,15 +287,18 @@ var facebookGrant = function (req, res) {
         json: true
     }, function (err, response, body) {
         if (err) {
-            res.status(401).send({
-                error: 'user not authorized'
-            });
+            log.error(err);
+            res.status(500).send([{
+                code: 500,
+                message: 'Internal Server Error'
+            }]);
             return;
         }
         if (response.statusCode !== 200) {
-            res.status(401).send({
-                error: 'user not authorized'
-            });
+            res.status(401).send([{
+                code: 401,
+                message: 'Unauthorized'
+            }]);
             return;
         }
         var access = body.access_token;
@@ -293,22 +312,27 @@ var facebookGrant = function (req, res) {
             json: true
         }, function (err, response, body) {
             if (err) {
-                res.status(401).send({
-                    error: 'user not authorized'
-                });
+                log.error(err);
+                res.status(500).send([{
+                    code: 500,
+                    message: 'Internal Server Error'
+                }]);
                 return;
             }
             if (response.statusCode !== 200) {
-                res.status(401).send({
-                    error: 'user not authorized'
-                });
+                res.status(401).send([{
+                    code: 401,
+                    message: 'Unauthorized'
+                }]);
                 return;
             }
             var email = body.email;
             if (!email) {
-                res.status(500).send({
-                    error: 'internal server error'
-                });
+                log.error(err);
+                res.status(500).send([{
+                    code: 500,
+                    message: 'Internal Server Error'
+                }]);
                 return;
             }
             User.findOne({
@@ -316,9 +340,10 @@ var facebookGrant = function (req, res) {
             }).populate('tokens').exec(function (err, user) {
                 if (err) {
                     log.error(err);
-                    res.status(500).send({
-                        error: 'internal server error'
-                    });
+                    res.status(500).send([{
+                        code: 500,
+                        message: 'Internal Server Error'
+                    }]);
                     return;
                 }
                 if (user) {
@@ -331,9 +356,10 @@ var facebookGrant = function (req, res) {
                 }, function (err, user) {
                     if (err) {
                         log.error(err);
-                        res.status(500).send({
-                            error: 'internal server error'
-                        });
+                        res.status(500).send([{
+                            code: 500,
+                            message: 'Internal Server Error'
+                        }]);
                         return;
                     }
                     sendToken(serandives.id, res, user);
@@ -346,15 +372,17 @@ var facebookGrant = function (req, res) {
 router.get('/tokens/:id', function (req, res) {
     var token = req.token;
     if (!token) {
-        res.status(404).send({
-            error: 'specified token cannot be found'
-        });
+        res.status(401).send([{
+            code: 401,
+            message: 'Unauthorized'
+        }]);
         return;
     }
     if (!token.can('tokens:' + req.params.id, 'read', token)) {
-        res.status(401).send({
-            error: 'unauthorized access for token'
-        });
+        res.status(401).send([{
+            code: 401,
+            message: 'Unauthorized'
+        }]);
         return;
     }
     token.has = permission.merge(token.has, token.client.has, token.user.has);
@@ -387,9 +415,10 @@ router.post('/tokens', function (req, res) {
             facebookGrant(req, res);
             break;
         default :
-            res.status(400).send({
-                error: 'unsupported grant type'
-            });
+            res.status(400).send([{
+                code: 400,
+                message: 'Bad Grant Type Request'
+            }]);
     }
 });
 
@@ -400,20 +429,21 @@ router.delete('/tokens/:id', function (req, res) {
         })
         .exec(function (err, token) {
             if (err) {
-                res.status(500).send({
-                    error: 'error while retrieving the token'
-                });
+                log.error(err);
+                res.status(500).send([{
+                    code: 500,
+                    message: 'Internal Server Error'
+                }]);
                 return;
             }
             if (!token) {
-                res.status(404).send({
-                    error: 'specified token cannot be found'
-                });
+                res.status(401).send([{
+                    code: 401,
+                    message: 'Unauthorized'
+                }]);
                 return;
             }
             token.remove();
-            res.status(200).send({
-                error: false
-            });
+            res.status(204).end();
         });
 });
