@@ -9,9 +9,9 @@ var bodyParser = require('body-parser');
 var errors = require('errors');
 var utils = require('utils');
 var permission = require('permission');
-var User = require('user');
-var Client = require('client');
-var Token = require('token');
+var User = require('model-users');
+var Client = require('model-clients');
+var Token = require('model-tokens');
 var auth = require('auth');
 var serandi = require('serandi');
 

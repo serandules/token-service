@@ -1,6 +1,6 @@
 {
-  "name": "token-service",
-  "description": "token-service",
+  "name": "service-tokens",
+  "description": "service-tokens",
   "version": "0.0.0",
   "author": {
     "name": "serandives",
@@ -20,13 +20,13 @@
     "permission": "serandules/permission#master",
     "auth": "serandules/auth#master",
     "serandi": "serandules/serandi#master",
-    "user": "serandules/user#master",
-    "client": "serandules/client#master",
-    "config": "serandules/config#master",
-    "token": "serandules/token#master"
+    "model-users": "serandules/model-users#master",
+    "model-clients": "serandules/model-clients#master",
+    "model-configs": "serandules/model-configs#master",
+    "model-tokens": "serandules/model-tokens#master"
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/serandules/token-service.git"
+    "url": "git://github.com/serandules/service-tokens.git"
   }
 }
