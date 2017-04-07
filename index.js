@@ -1,5 +1,4 @@
 var log = require('logger')('token-service');
-var errors = require('errors');
 var nconf = require('nconf');
 var request = require('request');
 var async = require('async');
@@ -7,6 +6,7 @@ var url = require('url');
 var express = require('express');
 var bodyParser = require('body-parser');
 
+var errors = require('errors');
 var utils = require('utils');
 var permission = require('permission');
 var User = require('user');
