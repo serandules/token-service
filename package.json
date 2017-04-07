@@ -1,26 +1,32 @@
 {
-    "name": "token-service",
-    "description": "token-service",
-    "version": "0.0.0",
-    "author": {
-        "name": "serandives",
-        "email": "serandives@gmail.com"
-    },
-    "dependencies": {
-        "mongoose": "4.*",
-        "express": "4.*",
-        "merge": "1.2.0",
-        "request": "2.69.0",
-        "async": "1.*",
-        "logger": "serandules/logger#master",
-        "permission": "serandules/permission#master",
-        "user": "serandules/user#master",
-        "client": "serandules/client#master",
-        "config": "serandules/config#master",
-        "token": "serandules/token#master"
-    },
-    "repository": {
-        "type": "git",
-        "url": "git://github.com/serandules/token-service.git"
-    }
+  "name": "token-service",
+  "description": "token-service",
+  "version": "0.0.0",
+  "author": {
+    "name": "serandives",
+    "email": "serandives@gmail.com"
+  },
+  "dependencies": {
+    "mongoose": "4.*",
+    "express": "4.*",
+    "body-parser": "1.17.1",
+    "merge": "1.2.0",
+    "request": "2.69.0",
+    "async": "1.*",
+    "nconf": "0.8.4",
+    "logger": "serandules/logger#master",
+    "errors": "serandules/errors#master",
+    "utils": "serandules/utils#master",
+    "permission": "serandules/permission#master",
+    "auth": "serandules/auth#master",
+    "serandi": "serandules/serandi#master",
+    "user": "serandules/user#master",
+    "client": "serandules/client#master",
+    "config": "serandules/config#master",
+    "token": "serandules/token#master"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/serandules/token-service.git"
+  }
 }
