@@ -14,7 +14,6 @@ var Client = require('client');
 var Token = require('token');
 var auth = require('auth');
 var serandi = require('serandi');
-var locate = require('locate');
 
 module.exports = function (router) {
     router.use(serandi.pond);
@@ -28,7 +27,6 @@ module.exports = function (router) {
         ]
     }));
     router.use(bodyParser.json());
-    router.use(serandi.locate('/apis/v'));
 
     var MIN_ACCESSIBILITY = 20 * 1000;
 
