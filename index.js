@@ -194,7 +194,7 @@ module.exports = function (router) {
             sendRefreshToken(req, res, tried)
         }, function (err) {
             if (err) {
-                res.pond(errors.conflict('Token Conflict'));
+                res.pond(errors.conflict());
             }
         })
     };
@@ -306,7 +306,7 @@ module.exports = function (router) {
                 facebookGrant(req, res);
                 break;
             default :
-                res.pond(errors.badRequest('Bad Grand Type Request'));
+                res.pond(errors.badRequest('Bad grand type request'));
         }
     });
 
