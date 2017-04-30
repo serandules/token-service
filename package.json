@@ -6,6 +6,9 @@
     "name": "serandives",
     "email": "serandives@gmail.com"
   },
+  "scripts": {
+    "test": "mocha"
+  },
   "dependencies": {
     "mongoose": "4.*",
     "express": "4.*",
@@ -24,6 +27,12 @@
     "model-clients": "serandules/model-clients#master",
     "model-configs": "serandules/model-configs#master",
     "model-tokens": "serandules/model-tokens#master"
+  },
+  "devDependencies": {
+    "mocha": "3.2.0",
+    "should": "11.2.1",
+    "request": "2.81.0",
+    "pot": "serandules/pot#master"
   },
   "repository": {
     "type": "git",
