@@ -80,11 +80,11 @@ describe('POST /tokens', function () {
             if (e) {
                 return done(e);
             }
-            r.statusCode.should.equal(errors.unprocessableEntiy().status);
+            r.statusCode.should.equal(errors.unprocessableEntity().status);
             should.exist(b);
             should.exist(b.code);
             should.exist(b.message);
-            b.code.should.equal(errors.unprocessableEntiy().data.code);
+            b.code.should.equal(errors.unprocessableEntity().data.code);
             done();
         });
     });
@@ -103,11 +103,11 @@ describe('POST /tokens', function () {
             if (e) {
                 return done(e);
             }
-            r.statusCode.should.equal(errors.unprocessableEntiy().status);
+            r.statusCode.should.equal(errors.unprocessableEntity().status);
             should.exist(b);
             should.exist(b.code);
             should.exist(b.message);
-            b.code.should.equal(errors.unprocessableEntiy().data.code);
+            b.code.should.equal(errors.unprocessableEntity().data.code);
             done();
         });
     });
@@ -127,11 +127,11 @@ describe('POST /tokens', function () {
             if (e) {
                 return done(e);
             }
-            r.statusCode.should.equal(errors.unprocessableEntiy().status);
+            r.statusCode.should.equal(errors.unprocessableEntity().status);
             should.exist(b);
             should.exist(b.code);
             should.exist(b.message);
-            b.code.should.equal(errors.unprocessableEntiy().data.code);
+            b.code.should.equal(errors.unprocessableEntity().data.code);
             done();
         });
     });
@@ -149,11 +149,11 @@ describe('POST /tokens', function () {
             if (e) {
                 return done(e);
             }
-            r.statusCode.should.equal(errors.unprocessableEntiy().status);
+            r.statusCode.should.equal(errors.unprocessableEntity().status);
             should.exist(b);
             should.exist(b.code);
             should.exist(b.message);
-            b.code.should.equal(errors.unprocessableEntiy().data.code);
+            b.code.should.equal(errors.unprocessableEntity().data.code);
             done();
         });
     });

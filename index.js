@@ -310,7 +310,7 @@ module.exports = function (router) {
                 facebookGrant(req, res);
                 break;
             default :
-                res.pond(errors.unprocessableEntiy('Invalid grand type request'));
+                res.pond(errors.unprocessableEntity('Invalid grand type request'));
         }
     });
 
