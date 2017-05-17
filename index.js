@@ -11,9 +11,9 @@ var utils = require('utils');
 var permission = require('permission');
 var auth = require('auth');
 var serandi = require('serandi');
-var User = require('model-users');
-var Client = require('model-clients');
-var Token = require('model-tokens');
+var Users = require('model-users');
+var Clients = require('model-clients');
+var Tokens = require('model-tokens');
 
 var validators = require('./validators');
 var sanitizers = require('./sanitizers');
@@ -32,7 +32,7 @@ var context = {
     }
 };
 
-Client.findOne({
+Clients.findOne({
     name: 'serandives'
 }, function (err, client) {
     if (err) {
@@ -47,7 +47,7 @@ Client.findOne({
 });
 
 var sendToken = function (clientId, res, user) {
-    Client.findOne({
+    Clients.findOne({
         _id: clientId
     }, function (err, client) {
         if (err) {
@@ -57,7 +57,7 @@ var sendToken = function (clientId, res, user) {
         if (!client) {
             return res.pond(errors.unauthorized());
         }
-        Token.findOne({
+        Tokens.findOne({
             user: user.id,
             client: client.id
         }, function (err, token) {
@@ -78,7 +78,7 @@ var sendToken = function (clientId, res, user) {
                     return;
                 }
             }
-            Token.create({
+            Tokens.create({
                 user: user.id,
                 client: client.id
             }, function (err, token) {
@@ -98,7 +98,7 @@ var sendToken = function (clientId, res, user) {
 };
 
 var passwordGrant = function (req, res) {
-    User.findOne({
+    Users.findOne({
         email: req.body.username
     }).populate('tokens').exec(function (err, user) {
         if (err) {
@@ -122,7 +122,7 @@ var passwordGrant = function (req, res) {
 };
 
 var sendRefreshToken = function (req, res, done) {
-    Token.findOne({
+    Tokens.findOne({
         refresh: req.body.refresh_token
     }).populate('client')
         .exec(function (err, token) {
@@ -149,7 +149,7 @@ var sendRefreshToken = function (req, res, done) {
                 });
                 return done();
             }
-            Token.refresh(token.id, function (err) {
+            Tokens.refresh(token.id, function (err) {
                 var code
                 if (err) {
                     code = err.code;
@@ -161,7 +161,7 @@ var sendRefreshToken = function (req, res, done) {
                     res.pond(errors.serverError());
                     return done()
                 }
-                Token.findOne({
+                Tokens.findOne({
                     _id: token.id
                 }, function (err, token) {
                     if (err) {
@@ -233,7 +233,7 @@ var facebookGrant = function (req, res) {
                 log.error(err);
                 return res.pond(errors.serverError());
             }
-            User.findOne({
+            Users.findOne({
                 email: email
             }).populate('tokens').exec(function (err, user) {
                 if (err) {
@@ -243,7 +243,7 @@ var facebookGrant = function (req, res) {
                 if (user) {
                     return sendToken(serandives.id, res, user);
                 }
-                User.create({
+                Users.create({
                     email: email,
                     firstname: body.first_name || '',
                     lastname: body.last_name || ''
@@ -316,7 +316,7 @@ module.exports = function (router) {
 
     router.delete('/:id', function (req, res) {
         var token = req.params.id;
-        Token.findOne({
+        Tokens.findOne({
             access: token
         })
             .exec(function (err, token) {
