@@ -316,19 +316,14 @@ module.exports = function (router) {
 
     router.delete('/:id', function (req, res) {
         var token = req.params.id;
-        Tokens.findOne({
+        Tokens.remove({
             access: token
-        })
-            .exec(function (err, token) {
-                if (err) {
-                    log.error(err);
-                    return res.pond(errors.serverError());
-                }
-                if (!token) {
-                    return res.pond(errors.unauthorized());
-                }
-                token.remove();
-                res.status(204).end();
-            });
+        }, function (err) {
+            if (err) {
+                log.error(err);
+                return res.pond(errors.serverError());
+            }
+            res.status(204).end();
+        });
     });
 };
