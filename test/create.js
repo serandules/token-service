@@ -181,7 +181,7 @@ describe('POST /tokens', function () {
         });
     });
 
-    it('password grand type with valid password', function (done) {
+    it('password grant type with valid password', function (done) {
         request({
             uri: pot.resolve('accounts', '/apis/v/tokens'),
             method: 'POST',
