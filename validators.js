@@ -35,7 +35,7 @@ var facebookGrant = function (res, data, next) {
 };
 
 exports.create = function (req, res, next) {
-    validators.pre({
+    validators.create({
         model: Tokens
     }, req, res, function (err) {
         if (err) {
