@@ -26,7 +26,7 @@ describe('POST /tokens', function () {
             uri: pot.resolve('accounts', '/apis/v/tokens'),
             method: 'POST',
             auth: {
-                bearer: client.token
+                bearer: client.users[0].token
             }
         }, function (e, r, b) {
             if (e) {
@@ -50,7 +50,7 @@ describe('POST /tokens', function () {
                 'Content-Type': 'application/xml'
             },
             auth: {
-                bearer: client.token
+                bearer: client.users[0].token
             }
         }, function (e, r, b) {
             if (e) {
@@ -74,7 +74,7 @@ describe('POST /tokens', function () {
                 grant_type: 'custom'
             },
             auth: {
-                bearer: client.token
+                bearer: client.users[0].token
             }
         }, function (e, r, b) {
             if (e) {
@@ -97,7 +97,7 @@ describe('POST /tokens', function () {
                 grant_type: 'password'
             },
             auth: {
-                bearer: client.token
+                bearer: client.users[0].token
             }
         }, function (e, r, b) {
             if (e) {
@@ -121,7 +121,7 @@ describe('POST /tokens', function () {
                 username: 'user@serandives.com'
             },
             auth: {
-                bearer: client.token
+                bearer: client.users[0].token
             }
         }, function (e, r, b) {
             if (e) {
