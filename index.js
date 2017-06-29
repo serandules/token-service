@@ -290,10 +290,10 @@ module.exports = function (router) {
         if (!token.can('tokens:' + req.params.id, 'read', token)) {
             return res.pond(errors.unauthorized());
         }
-        token.has = permission.merge(token.has, token.client.has, token.user.has);
+        token.has = permission.merge(token.has, token.client.has, req.user.has);
         res.send({
             id: token.id,
-            user: token.user.id,
+            user: req.user.id,
             client: token.client.id,
             access: token.access,
             refresh: token.refresh,
