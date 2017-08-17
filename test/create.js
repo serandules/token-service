@@ -118,7 +118,7 @@ describe('POST /tokens', function () {
             method: 'POST',
             json: {
                 grant_type: 'password',
-                username: 'user@serandives.com'
+                username: 'user0@serandives.com'
             },
             auth: {
                 bearer: client.users[0].token
@@ -142,7 +142,7 @@ describe('POST /tokens', function () {
             method: 'POST',
             json: {
                 grant_type: 'password',
-                username: 'user@serandives.com',
+                username: 'user0@serandives.com',
                 password: '123456'
             }
         }, function (e, r, b) {
@@ -165,7 +165,7 @@ describe('POST /tokens', function () {
             json: {
                 client_id: client.serandivesId,
                 grant_type: 'password',
-                username: 'user@serandives.com',
+                username: 'user0@serandives.com',
                 password: '123456'
             }
         }, function (e, r, b) {
@@ -188,7 +188,7 @@ describe('POST /tokens', function () {
             json: {
                 client_id: client.serandivesId,
                 grant_type: 'password',
-                username: 'user@serandives.com',
+                username: 'user0@serandives.com',
                 password: '1@2.Com'
             }
         }, function (e, r, b) {
