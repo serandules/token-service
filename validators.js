@@ -210,15 +210,20 @@ exports.create = function (req, res, next) {
 };
 
 exports.grant = function (req, res, next) {
-    var type = req.body.grant_type;
-    if (type === 'password') {
-        return passwordGrant(req, res, next);
-    }
-    if (type === 'refresh_token') {
-        return refreshGrant(req, res, next);
-    }
-    if (type === 'facebook') {
-        return facebookGrant(req, res, next);
-    }
-    res.pond(errors.unprocessableEntity('Invalid grand type request'));
+    validators.contents.json(req, res, function (err) {
+        if (err) {
+            return res.pond(err);
+        }
+        var type = req.body.grant_type;
+        if (type === 'password') {
+            return passwordGrant(req, res, next);
+        }
+        if (type === 'refresh_token') {
+            return refreshGrant(req, res, next);
+        }
+        if (type === 'facebook') {
+            return facebookGrant(req, res, next);
+        }
+        res.pond(errors.unprocessableEntity('Invalid grand type request'));
+    });
 };
