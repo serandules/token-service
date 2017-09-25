@@ -93,7 +93,6 @@ var sendToken = function (req, res) {
 };
 
 module.exports = function (router) {
-    router.use(serandi.pond);
     router.use(serandi.ctx);
     router.use(auth({
         GET: [
