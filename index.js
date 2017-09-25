@@ -66,6 +66,8 @@ var sendToken = function (req, res) {
             var expires;
             if (token) {
                 expires = token.accessibility();
+                console.log(expires)
+                console.log(MIN_ACCESSIBILITY)
                 if (expires > MIN_ACCESSIBILITY) {
                     res.send({
                         id: token.id,
@@ -105,6 +107,7 @@ module.exports = function (router) {
         ]
     }));
     router.use(bodyParser.json());
+    router.use(bodyParser.urlencoded({extended: true}));
 
     router.get('/:id', function (req, res) {
         var token = req.token;

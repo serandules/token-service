@@ -47,12 +47,13 @@ describe('GET /clients', function () {
                 request({
                     uri: pot.resolve('accounts', '/apis/v/tokens'),
                     method: 'POST',
-                    json: {
+                    form: {
                         client_id: serandivesId,
                         grant_type: 'password',
                         username: 'user@serandives.com',
                         password: '1@2.Com'
-                    }
+                    },
+                    json: true
                 }, function (e, r, b) {
                     if (e) {
                         return done(e);

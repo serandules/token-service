@@ -18,6 +18,7 @@ describe('POST /tokens', function () {
         request({
             uri: pot.resolve('accounts', '/apis/v/tokens'),
             method: 'POST',
+            json: true,
             auth: {
                 bearer: client.users[0].token
             }
@@ -27,7 +28,6 @@ describe('POST /tokens', function () {
             }
             r.statusCode.should.equal(errors.unsupportedMedia().status);
             should.exist(b);
-            b = JSON.parse(b);
             should.exist(b.code);
             should.exist(b.message);
             b.code.should.equal(errors.unsupportedMedia().data.code);
@@ -42,6 +42,7 @@ describe('POST /tokens', function () {
             headers: {
                 'Content-Type': 'application/xml'
             },
+            json: true,
             auth: {
                 bearer: client.users[0].token
             }
@@ -51,7 +52,6 @@ describe('POST /tokens', function () {
             }
             r.statusCode.should.equal(errors.unsupportedMedia().status);
             should.exist(b);
-            b = JSON.parse(b);
             should.exist(b.code);
             should.exist(b.message);
             b.code.should.equal(errors.unsupportedMedia().data.code);
@@ -63,9 +63,10 @@ describe('POST /tokens', function () {
         request({
             uri: pot.resolve('accounts', '/apis/v/tokens'),
             method: 'POST',
-            json: {
+            form: {
                 grant_type: 'custom'
             },
+            json: true,
             auth: {
                 bearer: client.users[0].token
             }
@@ -86,9 +87,10 @@ describe('POST /tokens', function () {
         request({
             uri: pot.resolve('accounts', '/apis/v/tokens'),
             method: 'POST',
-            json: {
+            form: {
                 grant_type: 'password'
             },
+            json: true,
             auth: {
                 bearer: client.users[0].token
             }
@@ -109,10 +111,11 @@ describe('POST /tokens', function () {
         request({
             uri: pot.resolve('accounts', '/apis/v/tokens'),
             method: 'POST',
-            json: {
+            form: {
                 grant_type: 'password',
                 username: 'user0@serandives.com'
             },
+            json: true,
             auth: {
                 bearer: client.users[0].token
             }
@@ -133,11 +136,12 @@ describe('POST /tokens', function () {
         request({
             uri: pot.resolve('accounts', '/apis/v/tokens'),
             method: 'POST',
-            json: {
+            form: {
                 grant_type: 'password',
                 username: 'user0@serandives.com',
                 password: '123456'
-            }
+            },
+            json: true
         }, function (e, r, b) {
             if (e) {
                 return done(e);
@@ -155,12 +159,13 @@ describe('POST /tokens', function () {
         request({
             uri: pot.resolve('accounts', '/apis/v/tokens'),
             method: 'POST',
-            json: {
+            form: {
                 client_id: client.serandivesId,
                 grant_type: 'password',
                 username: 'user0@serandives.com',
                 password: '123456'
-            }
+            },
+            json: true
         }, function (e, r, b) {
             if (e) {
                 return done(e);
@@ -178,12 +183,13 @@ describe('POST /tokens', function () {
         request({
             uri: pot.resolve('accounts', '/apis/v/tokens'),
             method: 'POST',
-            json: {
+            form: {
                 client_id: client.serandivesId,
                 grant_type: 'password',
                 username: 'user0@serandives.com',
                 password: '1@2.Com'
-            }
+            },
+            json: true
         }, function (e, r, b) {
             if (e) {
                 return done(e);

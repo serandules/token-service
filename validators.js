@@ -210,7 +210,7 @@ exports.create = function (req, res, next) {
 };
 
 exports.grant = function (req, res, next) {
-    validators.contents.json(req, res, function (err) {
+    validators.contents.urlencoded(req, res, function (err) {
         if (err) {
             return res.pond(err);
         }
@@ -224,6 +224,6 @@ exports.grant = function (req, res, next) {
         if (type === 'facebook') {
             return facebookGrant(req, res, next);
         }
-        res.pond(errors.unprocessableEntity('Invalid grand type request'));
+        res.pond(errors.unprocessableEntity('Invalid grand type requested'));
     });
 };
