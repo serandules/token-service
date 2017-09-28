@@ -2,8 +2,6 @@ var log = require('logger')('token-service');
 var express = require('express');
 var bodyParser = require('body-parser');
 var nconf = require('nconf');
-var request = require('request');
-var async = require('async');
 var url = require('url');
 
 var errors = require('errors');
@@ -18,30 +16,6 @@ var validators = require('./validators');
 var sanitizers = require('./sanitizers');
 
 var MIN_ACCESSIBILITY = validators.MIN_ACCESSIBILITY;
-
-var context = {
-    serandives: {},
-    facebook: {
-        id: nconf.get('facebookId'),
-        secret: nconf.get('facebookSecret'),
-        token: 'https://graph.facebook.com/v2.3/oauth/access_token',
-        profile: 'https://graph.facebook.com/me'
-    }
-};
-
-Clients.findOne({
-    name: 'serandives'
-}, function (err, client) {
-    if (err) {
-        throw err;
-    }
-    if (!client) {
-        throw new Error('no serandives client found in the database');
-    }
-    var serandives = context.serandives;
-    serandives.id = client.id;
-    serandives.secret = client.secret;
-});
 
 var sendToken = function (req, res) {
     var clientId = req.body.client;

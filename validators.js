@@ -1,17 +1,44 @@
 var log = require('logger')('token-service:validators');
+var nconf = require('nconf');
 var async = require('async');
+var request = require('request');
 
 var errors = require('errors');
 var validators = require('validators');
 var utils = require('utils');
 var Tokens = require('model-tokens');
 var Users = require('model-users');
+var Clients = require('model-clients');
 
 var REDIRECT_URI = utils.resolve('accounts://auth/oauth');
 
 var MIN_ACCESSIBILITY = 20 * 1000;
 
 exports.MIN_ACCESSIBILITY = MIN_ACCESSIBILITY;
+
+var context = {
+    serandives: {},
+    facebook: {
+        id: nconf.get('facebookId'),
+        secret: nconf.get('facebookSecret'),
+        token: 'https://graph.facebook.com/v2.3/oauth/access_token',
+        profile: 'https://graph.facebook.com/me'
+    }
+};
+
+Clients.findOne({
+    name: 'serandives'
+}, function (err, client) {
+    if (err) {
+        throw err;
+    }
+    if (!client) {
+        throw new Error('no serandives client found in the database');
+    }
+    var serandives = context.serandives;
+    serandives.id = client.id;
+    serandives.secret = client.secret;
+});
 
 var passwordGrant = function (req, res, next) {
     var data = req.body;
@@ -127,6 +154,7 @@ var refreshGrant = function (req, res) {
 };
 
 var facebookGrant = function (req, res, next) {
+    var data = req.body;
     var code = data.code;
     if (!code) {
         return res.pond(errors.unprocessableEntity('\'code\' needs to be specified'));
