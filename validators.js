@@ -19,8 +19,8 @@ exports.MIN_ACCESSIBILITY = MIN_ACCESSIBILITY;
 var context = {
     serandives: {},
     facebook: {
-        id: nconf.get('facebookId'),
-        secret: nconf.get('facebookSecret'),
+        id: nconf.get('FACEBOOK_ID'),
+        secret: nconf.get('FACEBOOK_SECRET'),
         token: 'https://graph.facebook.com/v2.3/oauth/access_token',
         profile: 'https://graph.facebook.com/me'
     }
