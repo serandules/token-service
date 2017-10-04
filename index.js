@@ -40,8 +40,6 @@ var sendToken = function (req, res) {
             var expires;
             if (token) {
                 expires = token.accessibility();
-                console.log(expires)
-                console.log(MIN_ACCESSIBILITY)
                 if (expires > MIN_ACCESSIBILITY) {
                     res.send({
                         id: token.id,
@@ -98,7 +96,7 @@ module.exports = function (router) {
             client: token.client.id,
             access: token.access,
             refresh: token.refresh,
-            created: token.created,
+            createdAt: token.createdAt,
             accessible: token.accessible,
             refreshable: token.refreshable,
             has: token.has

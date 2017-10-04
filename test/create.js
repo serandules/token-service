@@ -219,7 +219,7 @@ describe('POST /tokens', function () {
                 should.exist(b.client);
                 should.exist(b.access);
                 should.exist(b.refresh);
-                should.exist(b.created);
+                should.exist(b.createdAt);
                 should.exist(b.accessible);
                 should.exist(b.refreshable);
                 should.exist(b.has);
