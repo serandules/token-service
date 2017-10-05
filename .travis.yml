@@ -7,7 +7,7 @@ env:
     - env=test
 addons:
   hosts:
-    - test.serandives.com
+    - travis.serandives.com
   apt:
     sources:
       - ubuntu-toolchain-r-test
