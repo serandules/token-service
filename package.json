@@ -10,7 +10,7 @@
     "test": "mocha"
   },
   "dependencies": {
-    "mongoose": "4.*",
+    "mongoose": "5.*",
     "express": "4.*",
     "body-parser": "1.17.1",
     "merge": "1.2.0",
