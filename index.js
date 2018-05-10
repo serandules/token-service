@@ -8,6 +8,7 @@ var errors = require('errors');
 var utils = require('utils');
 var permission = require('permission');
 var auth = require('auth');
+var throttle = require('throttle');
 var serandi = require('serandi');
 var Clients = require('model-clients');
 var Tokens = require('model-tokens');
@@ -78,6 +79,7 @@ module.exports = function (router) {
             '^\/.*'
         ]
     }));
+    router.use(throttle({name: 'tokens'}));
     router.use(bodyParser.json());
     router.use(bodyParser.urlencoded({extended: true}));
 

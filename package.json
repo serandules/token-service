@@ -22,6 +22,7 @@
     "utils": "serandules/utils#master",
     "permission": "serandules/permission#master",
     "auth": "serandules/auth#master",
+    "throttle": "serandules/throttle#master",
     "serandi": "serandules/serandi#master",
     "model-users": "serandules/model-users#master",
     "model-clients": "serandules/model-clients#master",
