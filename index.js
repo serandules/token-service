@@ -79,7 +79,7 @@ module.exports = function (router) {
             '^\/.*'
         ]
     }));
-    router.use(throttle({name: 'tokens'}));
+    router.use(throttle.apis('tokens'));
     router.use(bodyParser.json());
     router.use(bodyParser.urlencoded({extended: true}));
 
