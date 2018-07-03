@@ -1,3 +1,3 @@
 var pot = require('pot');
 
-pot.throttlit('accounts', 'users');
+pot.throttlit('accounts', 'tokens');
