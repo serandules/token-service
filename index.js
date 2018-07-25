@@ -24,7 +24,7 @@ var sendToken = function (req, res) {
         _id: clientId
     }, function (err, client) {
         if (err) {
-            log.error(err);
+            log.error('clients:find-one', err);
             return res.pond(errors.serverError());
         }
         if (!client) {
@@ -35,7 +35,7 @@ var sendToken = function (req, res) {
             client: client.id
         }, function (err, token) {
             if (err) {
-                log.error(err);
+                log.error('tokens:find-one', err);
                 return res.pond(errors.serverError());
             }
             var expires;
@@ -53,7 +53,7 @@ var sendToken = function (req, res) {
             }
             Tokens.createIt(req, res, req.body, function (err, token) {
                 if (err) {
-                    log.error(err);
+                    log.error('tokens:create', err);
                     return res.pond(errors.serverError());
                 }
                 res.send({
@@ -119,7 +119,7 @@ module.exports = function (router) {
             access: token
         }, function (err) {
             if (err) {
-                log.error(err);
+                log.error('tokens:remove', err);
                 return res.pond(errors.serverError());
             }
             res.status(204).end();

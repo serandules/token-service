@@ -58,7 +58,7 @@ var passwordGrant = function (req, res, next) {
         email: req.body.username
     }).populate('tokens').exec(function (err, user) {
         if (err) {
-            log.error(err);
+            log.error('users:find-one', err);
             return res.pond(errors.serverError());
         }
         if (!user) {
@@ -66,7 +66,7 @@ var passwordGrant = function (req, res, next) {
         }
         user.auth(req.body.password, function (err, auth) {
             if (err) {
-                log.error(err);
+                log.error('users:auth', err);
                 return res.pond(errors.serverError());
             }
             if (!auth) {
@@ -85,7 +85,7 @@ var sendRefreshToken = function (req, res, done) {
     }).populate('client')
         .exec(function (err, token) {
             if (err) {
-                log.error(err);
+                log.error('tokens:find-one', err);
                 res.pond(errors.serverError());
                 return done();
             }
@@ -115,7 +115,7 @@ var sendRefreshToken = function (req, res, done) {
                         // since a pending retry exists, it will be retried
                         return done(err);
                     }
-                    log.error(err);
+                    log.error('tokens:refresh', err);
                     res.pond(errors.serverError());
                     return done()
                 }
@@ -123,7 +123,7 @@ var sendRefreshToken = function (req, res, done) {
                     _id: token.id
                 }, function (err, token) {
                     if (err) {
-                        log.error(err);
+                        log.error('tokens:find-one', err);
                         res.pond(errors.serverError());
                         return done();
                     }
@@ -173,7 +173,7 @@ var facebookGrant = function (req, res, next) {
         json: true
     }, function (err, response, body) {
         if (err) {
-            log.error(err);
+            log.error('facebook:grant', err);
             return res.pond(errors.serverError());
         }
         if (response.statusCode !== 200) {
@@ -190,7 +190,7 @@ var facebookGrant = function (req, res, next) {
             json: true
         }, function (err, response, body) {
             if (err) {
-                log.error(err);
+                log.error('facebook:token', err);
                 return res.pond(errors.serverError());
             }
             if (response.statusCode !== 200) {
@@ -198,14 +198,14 @@ var facebookGrant = function (req, res, next) {
             }
             var email = body.email;
             if (!email) {
-                log.error(err);
+                log.error('facebook:no-email', err);
                 return res.pond(errors.serverError());
             }
             Users.findOne({
                 email: email
             }).populate('tokens').exec(function (err, user) {
                 if (err) {
-                    log.error(err);
+                    log.error('users:find-one', err);
                     return res.pond(errors.serverError());
                 }
                 if (user) {
@@ -219,7 +219,7 @@ var facebookGrant = function (req, res, next) {
                     lastname: body.last_name || ''
                 }, function (err, user) {
                     if (err) {
-                        log.error(err);
+                        log.error('users:create', err);
                         return res.pond(errors.serverError());
                     }
                     req.user = user;
