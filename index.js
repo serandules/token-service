@@ -80,7 +80,6 @@ module.exports = function (router) {
         ]
     }));
     router.use(throttle.apis('tokens'));
-    router.use(serandi.cors);
     router.use(bodyParser.json());
     router.use(bodyParser.urlencoded({extended: true}));
 

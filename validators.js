@@ -5,6 +5,7 @@ var request = require('request');
 
 var errors = require('errors');
 var validators = require('validators');
+var serandi = require('serandi');
 var utils = require('utils');
 var Tokens = require('model-tokens');
 var Users = require('model-users');
@@ -244,7 +245,13 @@ exports.grant = function (req, res, next) {
         }
         var type = req.body.grant_type;
         if (type === 'password') {
-            return passwordGrant(req, res, next);
+            serandi.captcha(req, res, function (err) {
+              if (err) {
+                return next(err);
+              }
+              passwordGrant(req, res, next);
+            });
+            return;
         }
         if (type === 'refresh_token') {
             return refreshGrant(req, res, next);
