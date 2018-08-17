@@ -30,6 +30,11 @@ var sendToken = function (req, res) {
         if (!client) {
             return res.pond(errors.unauthorized());
         }
+        var location = req.body.location;
+        var to = client.to;
+        if (to.indexOf(location) === -1) {
+          return res.pond(errors.forbidden());
+        }
         Tokens.findOne({
             user: req.user.id,
             client: client.id

@@ -51,9 +51,13 @@ var passwordGrant = function (req, res, next) {
     if (!password) {
         return res.pond(errors.unprocessableEntity('\'password\' needs to be specified'));
     }
-    var client_id = data.client_id;
-    if (!client_id) {
+    var clientId = data.client_id;
+    if (!clientId) {
         return res.pond(errors.unprocessableEntity('\'client_id\' needs to be specified'));
+    }
+    var location = data.redirect_uri;
+    if (!location) {
+        return res.pond(errors.unprocessableEntity('\'redirect_uri\' needs to be specified'));
     }
     Users.findOne({
         email: req.body.username
@@ -74,7 +78,10 @@ var passwordGrant = function (req, res, next) {
                 return res.pond(errors.unauthorized());
             }
             req.user = user;
-            req.body = {client: req.body.client_id};
+            req.body = {
+              client: clientId,
+              location: location
+            };
             next();
         });
     });
