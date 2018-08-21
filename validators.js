@@ -167,6 +167,14 @@ var facebookGrant = function (req, res, next) {
     if (!code) {
         return res.pond(errors.unprocessableEntity('\'code\' needs to be specified'));
     }
+    var clientId = data.client_id;
+    if (!clientId) {
+      return res.pond(errors.unprocessableEntity('\'client_id\' needs to be specified'));
+    }
+    var location = data.redirect_uri;
+    if (!location) {
+      return res.pond(errors.unprocessableEntity('\'redirect_uri\' needs to be specified'));
+    }
     var serandives = context.serandives;
     var facebook = context.facebook;
     request({
@@ -218,7 +226,10 @@ var facebookGrant = function (req, res, next) {
                 }
                 if (user) {
                     req.user = user;
-                    req.body = {client: serandives.id};
+                    req.body = {
+                      client: clientId,
+                      location: location
+                    };
                     return next();
                 }
                 Users.create({
