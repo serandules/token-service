@@ -11,7 +11,7 @@ var Tokens = require('model-tokens');
 var Users = require('model-users');
 var Clients = require('model-clients');
 
-var REDIRECT_URI = utils.resolve('accounts://auth/oauth');
+var REDIRECT_URI = utils.resolve('accounts:///auth/oauth');
 
 var MIN_ACCESSIBILITY = 20 * 1000;
 
