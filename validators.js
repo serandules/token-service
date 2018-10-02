@@ -1,4 +1,4 @@
-var log = require('logger')('token-service:validators');
+var log = require('logger')('service-tokens:validators');
 var nconf = require('nconf');
 var async = require('async');
 var request = require('request');

@@ -56,7 +56,7 @@ var sendToken = function (req, res) {
                     return;
                 }
             }
-            Tokens.createIt(req, res, req.body, function (err, token) {
+            Tokens.create(req.body, function (err, token) {
                 if (err) {
                     log.error('tokens:create', err);
                     return res.pond(errors.serverError());
