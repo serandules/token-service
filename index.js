@@ -9,6 +9,7 @@ var utils = require('utils');
 var permission = require('permission');
 var auth = require('auth');
 var throttle = require('throttle');
+var mongutils = require('mongutils');
 var serandi = require('serandi');
 var Clients = require('model-clients');
 var Tokens = require('model-tokens');
@@ -72,7 +73,7 @@ var sendToken = function (req, res) {
     });
 };
 
-module.exports = function (router) {
+module.exports = function (router, done) {
     router.use(serandi.ctx);
     router.use(auth({
         GET: [
@@ -88,7 +89,7 @@ module.exports = function (router) {
     router.use(bodyParser.json());
     router.use(bodyParser.urlencoded({extended: true}));
 
-    router.get('/:id', function (req, res) {
+    router.get('/:id', validators.findOne, sanitizers.findOne, function (req, res, next) {
         var token = req.token;
         if (!token) {
             return res.pond(errors.unauthorized());
@@ -114,20 +115,18 @@ module.exports = function (router) {
      * grant_type=password&username=ruchira&password=ruchira
      * grant_type=refresh_token&refresh_token=123456
      */
-    router.post('/', validators.grant, validators.create, sanitizers.create, function (req, res) {
+    router.post('/', validators.grant, validators.create, sanitizers.create, function (req, res, next) {
         sendToken(req, res);
     });
 
-    router.delete('/:id', function (req, res) {
-        var token = req.params.id;
-        Tokens.remove({
-            access: token
-        }, function (err) {
-            if (err) {
-                log.error('tokens:remove', err);
-                return res.pond(errors.serverError());
-            }
-            res.status(204).end();
-        });
+    router.delete('/:id', validators.findOne, sanitizers.findOne, function (req, res, next) {
+      mongutils.remove(Tokens, req.query, function (err) {
+        if (err) {
+          return next(err);
+        }
+        res.status(204).end();
+      });
     });
+
+    done();
 };

@@ -18,7 +18,7 @@ var MIN_ACCESSIBILITY = 20 * 1000;
 exports.MIN_ACCESSIBILITY = MIN_ACCESSIBILITY;
 
 var context = {
-    serandives: {},
+    space: {},
     facebook: {
         id: nconf.get('FACEBOOK_ID'),
         secret: nconf.get('FACEBOOK_SECRET'),
@@ -27,18 +27,20 @@ var context = {
     }
 };
 
+var space = utils.space();
+
 Clients.findOne({
-    name: 'serandives'
+    name: space
 }, function (err, client) {
     if (err) {
         throw err;
     }
     if (!client) {
-        throw new Error('no serandives client found in the database');
+        throw new Error('no space client found in the database');
     }
-    var serandives = context.serandives;
-    serandives.id = client.id;
-    serandives.secret = client.secret;
+    var space = context.space;
+    space.id = client.id;
+    space.secret = client.secret;
 });
 
 var passwordGrant = function (req, res, next) {
@@ -250,12 +252,6 @@ var facebookGrant = function (req, res, next) {
     });
 };
 
-exports.create = function (req, res, next) {
-    validators.create({
-        model: Tokens
-    }, req, res, next);
-};
-
 exports.grant = function (req, res, next) {
     validators.contents.urlencoded(req, res, function (err) {
         if (err) {
@@ -279,4 +275,36 @@ exports.grant = function (req, res, next) {
         }
         res.pond(errors.unprocessableEntity('Invalid grand type requested'));
     });
+};
+
+exports.create = function (req, res, next) {
+  validators.create({
+    model: Tokens
+  }, req, res, next);
+};
+
+exports.update = function (req, res, next) {
+  validators.update({
+    id: req.params.id,
+    content: 'json',
+    model: Tokens
+  }, req, res, next);
+};
+
+exports.find = function (req, res, next) {
+  validators.query(req, res, function (err) {
+    if (err) {
+      return next(err);
+    }
+    validators.find({
+      model: Tokens
+    }, req, res, next);
+  });
+};
+
+exports.findOne = function (req, res, next) {
+  validators.findOne({
+    id: req.params.id,
+    model: Tokens
+  }, req, res, next);
 };
