@@ -90,12 +90,9 @@ module.exports = function (router, done) {
     router.use(bodyParser.urlencoded({extended: true}));
 
     router.get('/:id', validators.findOne, sanitizers.findOne, function (req, res, next) {
-        var token = req.token;
-        if (!token) {
-            return res.pond(errors.unauthorized());
-        }
-        if (!token.can('tokens:' + req.params.id, 'read', token)) {
-            return res.pond(errors.unauthorized());
+      mongutils.findOne(Tokens, req.query, function (err, token) {
+        if (err) {
+          return next(err);
         }
         token.has = permission.merge(token.has, token.client.has, req.user.has);
         res.send({
@@ -109,6 +106,7 @@ module.exports = function (router, done) {
             refreshable: token.refreshable,
             has: token.has
         });
+      });
     });
 
     /**
