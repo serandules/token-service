@@ -94,7 +94,6 @@ module.exports = function (router, done) {
         if (err) {
           return next(err);
         }
-        token.has = permission.merge(token.has, token.client.has, req.user.has);
         res.send({
             id: token.id,
             user: req.user.id,
@@ -103,8 +102,7 @@ module.exports = function (router, done) {
             refresh: token.refresh,
             createdAt: token.createdAt,
             accessible: token.accessible,
-            refreshable: token.refreshable,
-            has: token.has
+            refreshable: token.refreshable
         });
       });
     });
