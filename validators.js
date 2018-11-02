@@ -177,7 +177,7 @@ var facebookGrant = function (req, res, next) {
     if (!location) {
       return res.pond(errors.unprocessableEntity('\'redirect_uri\' needs to be specified'));
     }
-    var serandives = context.serandives;
+    var space = context.space;
     var facebook = context.facebook;
     request({
         method: 'GET',
@@ -236,16 +236,36 @@ var facebookGrant = function (req, res, next) {
                 }
                 Users.create({
                     email: email,
+                    password: 'dummy',
                     firstname: body.first_name || '',
                     lastname: body.last_name || ''
                 }, function (err, user) {
                     if (err) {
-                        log.error('users:create', err);
-                        return res.pond(errors.serverError());
+                      if (err.code === mongutils.errors.DuplicateKey) {
+                        return res.pond(errors.conflict());
+                      }
+                      log.error('users:create', err);
+                      return res.pond(errors.serverError());
                     }
-                    req.user = user;
-                    req.body = {client: serandives.id};
-                    next();
+                    var permissions = user.permissions;
+                    permissions.push({
+                      user: user.id,
+                      actions: ['read', 'update', 'delete']
+                    });
+                    Users.findOneAndUpdate({_id: user.id}, {
+                      permissions: permissions
+                    }, {new: true}).exec(function (err, user) {
+                      if (err) {
+                        log.error('users:find-one-and-update', err);
+                        return res.pond(errors.serverError());
+                      }
+                      req.user = user;
+                      req.body = {
+                        client: space.id,
+                        location: location
+                      };
+                      next();
+                    });
                 });
             });
         })

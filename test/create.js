@@ -239,7 +239,6 @@ describe('POST /tokens', function () {
         should.exist(b.createdAt);
         should.exist(b.accessible);
         should.exist(b.refreshable);
-        should.exist(b.has);
         done();
       });
     });
