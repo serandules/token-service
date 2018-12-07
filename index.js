@@ -1,128 +1,126 @@
 var log = require('logger')('token-service');
-var express = require('express');
 var bodyParser = require('body-parser');
-var nconf = require('nconf');
-var url = require('url');
 
 var errors = require('errors');
-var utils = require('utils');
-var permission = require('permission');
 var auth = require('auth');
 var throttle = require('throttle');
-var mongutils = require('mongutils');
 var serandi = require('serandi');
 var Clients = require('model-clients');
 var Tokens = require('model-tokens');
+var model = require('model');
 
 var validators = require('./validators');
-var sanitizers = require('./sanitizers');
 
 var MIN_ACCESSIBILITY = validators.MIN_ACCESSIBILITY;
 
-var sendToken = function (req, res) {
-    var clientId = req.body.client;
-    Clients.findOne({
-        _id: clientId
-    }, function (err, client) {
+var sendToken = function (req, res, next) {
+  var clientId = req.body.client;
+  Clients.findOne({
+    _id: clientId
+  }, function (err, client) {
+    if (err) {
+      log.error('clients:find-one', err);
+      return next(errors.serverError());
+    }
+    if (!client) {
+      return next(errors.unauthorized());
+    }
+    var location = req.body.location;
+    var to = client.to;
+    if (to.indexOf(location) === -1) {
+      return next(errors.forbidden());
+    }
+    Tokens.findOne({
+      user: req.user.id,
+      client: client.id
+    }, function (err, token) {
+      if (err) {
+        log.error('tokens:find-one', err);
+        return next(errors.serverError());
+      }
+      var expires;
+      if (token) {
+        expires = token.accessibility();
+        if (expires > MIN_ACCESSIBILITY) {
+          res.send({
+            id: token.id,
+            access_token: token.access,
+            refresh_token: token.refresh,
+            expires_in: expires
+          });
+          return;
+        }
+      }
+      model.create(req.ctx, function (err, token) {
         if (err) {
-            log.error('clients:find-one', err);
-            return res.pond(errors.serverError());
+          log.error('tokens:create', err);
+          return next(errors.serverError());
         }
-        if (!client) {
-            return res.pond(errors.unauthorized());
-        }
-        var location = req.body.location;
-        var to = client.to;
-        if (to.indexOf(location) === -1) {
-          return res.pond(errors.forbidden());
-        }
-        Tokens.findOne({
-            user: req.user.id,
-            client: client.id
-        }, function (err, token) {
-            if (err) {
-                log.error('tokens:find-one', err);
-                return res.pond(errors.serverError());
-            }
-            var expires;
-            if (token) {
-                expires = token.accessibility();
-                if (expires > MIN_ACCESSIBILITY) {
-                    res.send({
-                        id: token.id,
-                        access_token: token.access,
-                        refresh_token: token.refresh,
-                        expires_in: expires
-                    });
-                    return;
-                }
-            }
-            Tokens.create(req.body, function (err, token) {
-                if (err) {
-                    log.error('tokens:create', err);
-                    return res.pond(errors.serverError());
-                }
-                res.send({
-                    id: token.id,
-                    access_token: token.access,
-                    refresh_token: token.refresh,
-                    expires_in: token.accessible
-                });
-            });
+        res.send({
+          id: token.id,
+          access_token: token.access,
+          refresh_token: token.refresh,
+          expires_in: token.accessible
         });
+      });
     });
+  });
 };
 
 module.exports = function (router, done) {
-    router.use(serandi.ctx);
-    router.use(auth({
-        GET: [
-            '^\/$',
-            '^\/.*'
-        ],
-        POST: [
-            '^\/$',
-            '^\/.*'
-        ]
-    }));
-    router.use(throttle.apis('tokens'));
-    router.use(bodyParser.json());
-    router.use(bodyParser.urlencoded({extended: true}));
+  router.use(serandi.ctx);
+  router.use(auth({
+    GET: [
+      '^\/$',
+      '^\/.*'
+    ],
+    POST: [
+      '^\/$',
+      '^\/.*'
+    ]
+  }));
+  router.use(throttle.apis('tokens'));
+  router.use(bodyParser.json());
+  router.use(bodyParser.urlencoded({extended: true}));
 
-    router.get('/:id', validators.findOne, sanitizers.findOne, function (req, res, next) {
-      mongutils.findOne(Tokens, req.query, function (err, token) {
+  router.get('/:id',
+    serandi.findOne(Tokens),
+    function (req, res, next) {
+      model.findOne(req.ctx, function (err, token) {
         if (err) {
           return next(err);
         }
         res.send({
-            id: token.id,
-            user: req.user.id,
-            client: token.client.id,
-            access: token.access,
-            refresh: token.refresh,
-            createdAt: token.createdAt,
-            accessible: token.accessible,
-            refreshable: token.refreshable
+          id: token.id,
+          user: req.user.id,
+          client: token.client.id,
+          access: token.access,
+          refresh: token.refresh,
+          createdAt: token.createdAt,
+          accessible: token.accessible,
+          refreshable: token.refreshable
         });
       });
     });
 
-    /**
-     * grant_type=password&username=ruchira&password=ruchira
-     * grant_type=refresh_token&refresh_token=123456
-     */
-    router.post('/', validators.grant, validators.create, sanitizers.create, function (req, res, next) {
-        sendToken(req, res);
+  router.post('/',
+    serandi.urlencoded,
+    validators.grant,
+    serandi.create(Tokens),
+    function (req, res, next) {
+      sendToken(req, res, next);
     });
 
-    router.delete('/:id', validators.findOne, sanitizers.findOne, function (req, res, next) {
-      mongutils.remove(Tokens, req.query, function (err) {
-        if (err) {
-          return next(err);
-        }
-        res.status(204).end();
-      });
+  router.delete('/:id',
+    serandi.remove(Tokens),
+    function (req, res, next) {
+    model.remove(req.ctx, function (err) {
+      if (err) {
+        return next(err);
+      }
+      res.status(204).end();
     });
+  });
 
-    done();
+  done();
 };

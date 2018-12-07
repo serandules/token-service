@@ -4,7 +4,6 @@ var async = require('async');
 var request = require('request');
 
 var errors = require('errors');
-var validators = require('validators');
 var serandi = require('serandi');
 var utils = require('utils');
 var Tokens = require('model-tokens');
@@ -273,58 +272,21 @@ var facebookGrant = function (req, res, next) {
 };
 
 exports.grant = function (req, res, next) {
-    validators.contents.urlencoded(req, res, function (err) {
-        if (err) {
-            return res.pond(err);
-        }
-        var type = req.body.grant_type;
-        if (type === 'password') {
-            serandi.captcha(req, res, function (err) {
-              if (err) {
-                return next(err);
-              }
-              passwordGrant(req, res, next);
-            });
-            return;
-        }
-        if (type === 'refresh_token') {
-            return refreshGrant(req, res, next);
-        }
-        if (type === 'facebook') {
-            return facebookGrant(req, res, next);
-        }
-        res.pond(errors.unprocessableEntity('Invalid grand type requested'));
+  var type = req.body.grant_type;
+  if (type === 'password') {
+    serandi.captcha(req, res, function (err) {
+      if (err) {
+        return next(err);
+      }
+      passwordGrant(req, res, next);
     });
-};
-
-exports.create = function (req, res, next) {
-  validators.create({
-    model: Tokens
-  }, req, res, next);
-};
-
-exports.update = function (req, res, next) {
-  validators.update({
-    id: req.params.id,
-    content: 'json',
-    model: Tokens
-  }, req, res, next);
-};
-
-exports.find = function (req, res, next) {
-  validators.query(req, res, function (err) {
-    if (err) {
-      return next(err);
-    }
-    validators.find({
-      model: Tokens
-    }, req, res, next);
-  });
-};
-
-exports.findOne = function (req, res, next) {
-  validators.findOne({
-    id: req.params.id,
-    model: Tokens
-  }, req, res, next);
+    return;
+  }
+  if (type === 'refresh_token') {
+    return refreshGrant(req, res, next);
+  }
+  if (type === 'facebook') {
+    return facebookGrant(req, res, next);
+  }
+  res.pond(errors.unprocessableEntity('Invalid grand type requested'));
 };
