@@ -23,6 +23,7 @@ describe('GET /clients', function () {
           'X-Captcha': 'dummy'
         },
         json: {
+          alias: 'user',
           email: 'user@serandives.com',
           password: '1@2.Com',
         }

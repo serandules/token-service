@@ -70,7 +70,7 @@ var passwordGrant = function (req, res, next) {
         if (!user) {
             return res.pond(errors.unauthorized());
         }
-        user.auth(req.body.password, function (err, auth) {
+        Users.auth(user, req.body.password, function (err, auth) {
             if (err) {
                 log.error('users:auth', err);
                 return res.pond(errors.serverError());
@@ -233,11 +233,13 @@ var facebookGrant = function (req, res, next) {
                     };
                     return next();
                 }
+                var name = body.first_name || '';
+                name += name ? ' ' : '';
+                name += body.last_name || '';
                 Users.create({
                     email: email,
                     password: 'dummy',
-                    firstname: body.first_name || '',
-                    lastname: body.last_name || ''
+                    alias: name
                 }, function (err, user) {
                     if (err) {
                       if (err.code === mongutils.errors.DuplicateKey) {
