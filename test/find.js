@@ -16,74 +16,37 @@ describe('GET /clients', function () {
         return done(err);
       }
       client = c;
-      request({
-        uri: pot.resolve('accounts', '/apis/v/users'),
-        method: 'POST',
-        headers: {
-          'X-Captcha': 'dummy'
-        },
-        json: {
-          alias: 'user',
-          email: 'user@serandives.com',
-          password: '1@2.Com',
-        }
-      }, function (e, r, b) {
-        if (e) {
-          return done(e);
-        }
-        r.statusCode.should.equal(201);
-        should.exist(b);
-        should.exist(b.id);
-        should.exist(b.email);
-        b.email.should.equal('user@serandives.com');
-        user = b;
+      pot.createUser(c.serandivesId, {
+        alias: 'user',
+        email: 'user@serandives.com',
+        password: '1@2.Com',
+      }, function (err, usr, token) {
+        user = usr;
+        accessToken = token.access_token;
         request({
-          uri: pot.resolve('accounts', '/apis/v/tokens'),
+          uri: pot.resolve('accounts', '/apis/v/clients'),
           method: 'POST',
-          headers: {
-            'X-Captcha': 'dummy'
+          json: {
+            name: 'custom',
+            to: ['http://test.serandives.com/dummy']
           },
-          form: {
-            client_id: client.serandivesId,
-            grant_type: 'password',
-            username: 'user@serandives.com',
-            password: '1@2.Com',
-            redirect_uri: pot.resolve('accounts', '/auth')
-          },
-          json: true
+          auth: {
+            bearer: accessToken
+          }
         }, function (e, r, b) {
           if (e) {
             return done(e);
           }
-          r.statusCode.should.equal(200);
-          should.exist(b.access_token);
-          should.exist(b.refresh_token);
-          accessToken = b.access_token;
-          request({
-            uri: pot.resolve('accounts', '/apis/v/clients'),
-            method: 'POST',
-            json: {
-              name: 'custom',
-              to: ['http://test.serandives.com/dummy']
-            },
-            auth: {
-              bearer: accessToken
-            }
-          }, function (e, r, b) {
-            if (e) {
-              return done(e);
-            }
-            r.statusCode.should.equal(201);
-            should.exist(b);
-            should.exist(b.id);
-            should.exist(b.name);
-            should.exist(b.to);
-            b.name.should.equal('custom');
-            b.to.length.should.equal(1);
-            b.to[0].should.equal('http://test.serandives.com/dummy');
-            custom = b;
-            done();
-          });
+          r.statusCode.should.equal(201);
+          should.exist(b);
+          should.exist(b.id);
+          should.exist(b.name);
+          should.exist(b.to);
+          b.name.should.equal('custom');
+          b.to.length.should.equal(1);
+          b.to[0].should.equal('http://test.serandives.com/dummy');
+          custom = b;
+          done();
         });
       });
     });

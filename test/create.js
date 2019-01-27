@@ -243,4 +243,55 @@ describe('POST /tokens', function () {
       });
     });
   });
+
+  it('password grant with a blocked user', function (done) {
+    var usr = {
+      email: 'unconfirmed@serandives.com',
+      password: '1@2.Com',
+      alias: 'unconfirmed-user'
+    };
+    request({
+      uri: pot.resolve('accounts', '/apis/v/users'),
+      method: 'POST',
+      headers: {
+        'X-Captcha': 'dummy'
+      },
+      json: usr
+    }, function (e, r, user) {
+      if (e) {
+        return done(e);
+      }
+      if (r.statusCode !== 201) {
+        return done(new Error(r.statusCode));
+      }
+      should.exist(user.id);
+      should.exist(user.email);
+      user.email.should.equal(usr.email);
+      request({
+        uri: pot.resolve('accounts', '/apis/v/tokens'),
+        method: 'POST',
+        headers: {
+          'X-Captcha': 'dummy'
+        },
+        form: {
+          client_id: client.serandivesId,
+          grant_type: 'password',
+          username: 'unconfirmed@serandives.com',
+          password: '1@2.Com',
+          redirect_uri: pot.resolve('accounts', '/auth')
+        },
+        json: true
+      }, function (e, r, b) {
+        if (e) {
+          return done(e);
+        }
+        r.statusCode.should.equal(errors.forbidden().status);
+        should.exist(b);
+        should.exist(b.code);
+        should.exist(b.message);
+        b.code.should.equal(errors.forbidden().data.code);
+        done();
+      });
+    });
+  });
 });

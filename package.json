@@ -25,6 +25,8 @@
     "auth": "serandules/auth#master",
     "throttle": "serandules/throttle#master",
     "serandi": "serandules/serandi#master",
+    "mongutils": "serandules/mongutils#master",
+    "model": "serandules/model#master",
     "model-users": "serandules/model-users#master",
     "model-clients": "serandules/model-clients#master",
     "model-configs": "serandules/model-configs#master",
