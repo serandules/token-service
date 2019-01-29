@@ -16,7 +16,7 @@
     "merge": "1.2.0",
     "request": "2.69.0",
     "async": "1.*",
-    "nconf": "0.8.4",
+    "nconf": "0.10.0",
     "logger": "serandules/logger#master",
     "errors": "serandules/errors#master",
     "utils": "serandules/utils#master",
