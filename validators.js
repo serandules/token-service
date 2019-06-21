@@ -73,7 +73,7 @@ var passwordGrant = function (req, res, next) {
     if (!user) {
       return next(errors.unauthorized());
     }
-    if (user._ && user._.blocked) {
+    if (user.status !== 'registered') {
       return next(errors.forbidden());
     }
     Users.auth(user, req.body.password, function (err, auth) {
@@ -107,7 +107,7 @@ var sendRefreshToken = function (req, res, done) {
       if (!token) {
         return done(errors.unauthorized());
       }
-      if (token.user._ && token.user._.blocked) {
+      if (token.user && token.user.status !== 'registered') {
         return done(errors.forbidden());
       }
       var expin = token.refreshability();
@@ -211,7 +211,7 @@ var facebookGrant = function (req, res, next) {
     return next(errors.unprocessableEntity('\'redirect_uri\' needs to be specified'));
   }
   var userExists = function (user, next) {
-    if (user._ && user._.blocked) {
+    if (user.status !== 'registered') {
       return next(errors.forbidden());
     }
     req.user = user;
