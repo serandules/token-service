@@ -286,7 +286,8 @@ var facebookGrant = function (req, res, next) {
               email: email,
               password: pass,
               alias: name
-            }
+            },
+            overrides: {}
           }, function (err, user) {
             if (err) {
               if (err.code === mongutils.errors.DuplicateKey) {
@@ -295,57 +296,43 @@ var facebookGrant = function (req, res, next) {
               log.error('users:create', err);
               return next(errors.serverError());
             }
-            utils.group('public', function (err, pub) {
+            utils.workflow('model-users', function (err, workflow) {
               if (err) {
-                return done(err);
+                return next(err);
               }
-              utils.group('anonymous', function (err, anon) {
+              var status = 'registered';
+              var permit = workflow.permits[status];
+              var usr = utils.json(user);
+              utils.toPermissions(usr.id, permit, function (err, permissions) {
                 if (err) {
-                  return done(err);
+                  return next(err);
                 }
-
-                var permissions = user.permissions;
-                permissions.push({
-                  user: user.id,
-                  actions: ['read', 'update', 'delete']
-                });
-                permissions.push({
-                  group: pub.id,
-                  actions: ['read']
-                });
-                permissions.push({
-                  group: anon.id,
-                  actions: ['read']
-                });
-
-                var visibility = user.visibility;
-                var all = visibility['*'];
-                all.users.push(user.id);
-                var alias = visibility['alias'] || (visibility['alias'] = {groups: []});
-                alias.groups.push(pub.id);
-                alias.groups.push(anon.id);
-
-                Users.findOneAndUpdate({_id: user.id}, {
-                  permissions: permissions,
-                  visibility: visibility
-                }, {new: true}).exec(function (err, user) {
+                utils.toVisibility(usr.id, permit, function (err, visibility) {
                   if (err) {
-                    log.error('users:find-one-and-update', err);
-                    return next(errors.serverError());
+                    return next(err);
                   }
-                  req.user = user;
-                  req.body = {
-                    client: space.id,
-                    location: location
-                  };
-                  next();
+                  Users.findOneAndUpdate({_id: user.id}, {
+                    status: status,
+                    permissions: permissions,
+                    visibility: visibility
+                  }).exec(function (err) {
+                    if (err) {
+                      return next(err);
+                    }
+                    req.user = user;
+                    req.body = {
+                      client: space.id,
+                      location: location
+                    };
+                    next();
+                  });
                 });
               });
             });
           });
         });
       });
-    })
+    });
   });
 };
 
