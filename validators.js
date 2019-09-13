@@ -20,7 +20,7 @@ var MIN_ACCESSIBILITY = 20 * 1000;
 exports.MIN_ACCESSIBILITY = MIN_ACCESSIBILITY;
 
 var context = {
-  space: {},
+  domain: {},
   facebook: {
     id: nconf.get('FACEBOOK_ID'),
     secret: nconf.get('FACEBOOK_SECRET'),
@@ -29,20 +29,20 @@ var context = {
   }
 };
 
-var space = utils.space();
+var domain = utils.domain();
 
 Clients.findOne({
-  name: space
+  name: domain
 }, function (err, client) {
   if (err) {
     throw err;
   }
   if (!client) {
-    throw new Error('no space client found in the database');
+    throw new Error('no domain client found in the database');
   }
-  var space = context.space;
-  space.id = client.id;
-  space.secret = client.secret;
+  var domain = context.domain;
+  domain.id = client.id;
+  domain.secret = client.secret;
 });
 
 var passwordGrant = function (req, res, next) {
@@ -221,7 +221,7 @@ var facebookGrant = function (req, res, next) {
     };
     next();
   };
-  var space = context.space;
+  var domain = context.domain;
   var facebook = context.facebook;
   request({
     method: 'GET',
@@ -321,7 +321,7 @@ var facebookGrant = function (req, res, next) {
                     }
                     req.user = user;
                     req.body = {
-                      client: space.id,
+                      client: domain.id,
                       location: location
                     };
                     next();
