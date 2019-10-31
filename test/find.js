@@ -61,11 +61,11 @@ describe('GET /clients', function () {
       if (e) {
         return done(e);
       }
-      r.statusCode.should.equal(errors.unauthorized().status);
+      r.statusCode.should.equal(errors.notFound().status);
       should.exist(b);
       should.exist(b.code);
       should.exist(b.message);
-      b.code.should.equal(errors.unauthorized().data.code);
+      b.code.should.equal(errors.notFound().data.code);
       done();
     });
   });
