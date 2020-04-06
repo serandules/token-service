@@ -285,7 +285,7 @@ var facebookGrant = function (req, res, next) {
             data: {
               email: email,
               password: pass,
-              alias: name
+              username: name
             },
             overrides: {}
           }, function (err, user) {

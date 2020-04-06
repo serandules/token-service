@@ -248,7 +248,7 @@ describe('POST /tokens', function () {
     var usr = {
       email: 'unconfirmed@serandives.com',
       password: '1@2.Com',
-      alias: 'unconfirmed-user'
+      username: 'unconfirmed-user'
     };
     request({
       uri: pot.resolve('accounts', '/apis/v/users'),

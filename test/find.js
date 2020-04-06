@@ -17,7 +17,7 @@ describe('GET /clients', function () {
       }
       client = c;
       pot.createUser(c.serandivesId, {
-        alias: 'user',
+        username: 'user',
         email: 'user@serandives.com',
         password: '1@2.Com',
       }, function (err, usr, token) {
