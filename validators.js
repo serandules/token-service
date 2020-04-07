@@ -24,8 +24,8 @@ var context = {
   facebook: {
     id: nconf.get('FACEBOOK_ID'),
     secret: nconf.get('FACEBOOK_SECRET'),
-    token: 'https://graph.facebook.com/v2.3/oauth/access_token',
-    profile: 'https://graph.facebook.com/me'
+    token: nconf.get('FACEBOOK_TOKEN_URI'),
+    profile: nconf.get('FACEBOOK_PROFILE_URI')
   }
 };
 
@@ -273,6 +273,10 @@ var facebookGrant = function (req, res, next) {
         if (user) {
           return userExists(user, next);
         }
+        var username = data.username;
+        if (!username) {
+          return next(errors.unauthorized());
+        }
         var name = body.first_name || '';
         name += name ? ' ' : '';
         name += body.last_name || '';
@@ -285,7 +289,8 @@ var facebookGrant = function (req, res, next) {
             data: {
               email: email,
               password: pass,
-              username: name
+              username: username,
+              name: name
             },
             overrides: {}
           }, function (err, user) {
