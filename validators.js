@@ -306,13 +306,12 @@ var facebookGrant = function (req, res, next) {
                 return next(err);
               }
               var status = 'registered';
-              var permit = workflow.permits[status];
               var usr = utils.json(user);
-              utils.toPermissions(usr.id, permit, usr, function (err, permissions) {
+              utils.toPermissions(usr.id, workflow, status, usr, function (err, permissions) {
                 if (err) {
                   return next(err);
                 }
-                utils.toVisibility(usr.id, permit, usr, function (err, visibility) {
+                utils.toVisibility(usr.id, workflow, status, usr, function (err, visibility) {
                   if (err) {
                     return next(err);
                   }
