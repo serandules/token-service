@@ -158,13 +158,11 @@ var refreshGrant = function (req, res, next) {
   if (!refreshToken) {
     return next(errors.unprocessableEntity('\'refresh_token\' needs to be specified'));
   }
-  async.retry({times: 4, interval: 500}, function (tried) {
-    sendRefreshToken(req, res, tried)
-  }, function (err) {
+  sendRefreshToken(req, res, function (err) {
     if (err) {
-      next(errors.conflict());
+      return next(err);
     }
-  });
+  })
 };
 
 var upperCase = function () {
