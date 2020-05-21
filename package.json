@@ -26,17 +26,16 @@
     "throttle": "serandules/throttle#master",
     "serandi": "serandules/serandi#master",
     "mongutils": "serandules/mongutils#master",
-    "model": "serandules/model#master",
     "model-users": "serandules/model-users#master",
     "model-clients": "serandules/model-clients#master",
     "model-configs": "serandules/model-configs#master",
     "model-tokens": "serandules/model-tokens#master"
   },
   "devDependencies": {
-    "mocha": "4.1.0",
-    "should": "11.2.1",
+    "mocha": "^4.1.0",
+    "pot": "serandules/pot#master",
     "request": "2.81.0",
-    "pot": "serandules/pot#master"
+    "should": "11.2.1"
   },
   "repository": {
     "type": "git",
