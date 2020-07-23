@@ -24,7 +24,7 @@ describe('GET /clients', function () {
         user = usr;
         accessToken = token.access_token;
         request({
-          uri: pot.resolve('accounts', '/apis/v/clients'),
+          uri: pot.resolve('apis', '/v/clients'),
           method: 'POST',
           json: {
             name: 'custom',
@@ -54,7 +54,7 @@ describe('GET /clients', function () {
 
   it('GET /clients/:id unauthorized', function (done) {
     request({
-      uri: pot.resolve('accounts', '/apis/v/clients/' + custom.id),
+      uri: pot.resolve('apis', '/v/clients/' + custom.id),
       method: 'GET',
       json: true
     }, function (e, r, b) {
@@ -72,7 +72,7 @@ describe('GET /clients', function () {
 
   it('GET /clients/:id', function (done) {
     request({
-      uri: pot.resolve('accounts', '/apis/v/clients/' + custom.id),
+      uri: pot.resolve('apis', '/v/clients/' + custom.id),
       method: 'GET',
       auth: {
         bearer: accessToken

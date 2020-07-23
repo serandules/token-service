@@ -16,7 +16,7 @@ describe('POST /tokens', function () {
 
   it('with no media type', function (done) {
     request({
-      uri: pot.resolve('accounts', '/apis/v/tokens'),
+      uri: pot.resolve('apis', '/v/tokens'),
       method: 'POST',
       json: true,
       auth: {
@@ -37,7 +37,7 @@ describe('POST /tokens', function () {
 
   it('with unsupported media type', function (done) {
     request({
-      uri: pot.resolve('accounts', '/apis/v/tokens'),
+      uri: pot.resolve('apis', '/v/tokens'),
       method: 'POST',
       headers: {
         'Content-Type': 'application/xml'
@@ -61,7 +61,7 @@ describe('POST /tokens', function () {
 
   it('with unsupported grant type', function (done) {
     request({
-      uri: pot.resolve('accounts', '/apis/v/tokens'),
+      uri: pot.resolve('apis', '/v/tokens'),
       method: 'POST',
       form: {
         grant_type: 'custom'
@@ -85,7 +85,7 @@ describe('POST /tokens', function () {
 
   it('password grand type without username', function (done) {
     request({
-      uri: pot.resolve('accounts', '/apis/v/tokens'),
+      uri: pot.resolve('apis', '/v/tokens'),
       method: 'POST',
       headers: {
         'X-Captcha': 'dummy'
@@ -112,7 +112,7 @@ describe('POST /tokens', function () {
 
   it('password grand type without password', function (done) {
     request({
-      uri: pot.resolve('accounts', '/apis/v/tokens'),
+      uri: pot.resolve('apis', '/v/tokens'),
       method: 'POST',
       headers: {
         'X-Captcha': 'dummy'
@@ -140,7 +140,7 @@ describe('POST /tokens', function () {
 
   it('password grand type without client_id', function (done) {
     request({
-      uri: pot.resolve('accounts', '/apis/v/tokens'),
+      uri: pot.resolve('apis', '/v/tokens'),
       method: 'POST',
       headers: {
         'X-Captcha': 'dummy'
@@ -166,7 +166,7 @@ describe('POST /tokens', function () {
 
   it('password grand type with unauthorized password', function (done) {
     request({
-      uri: pot.resolve('accounts', '/apis/v/tokens'),
+      uri: pot.resolve('apis', '/v/tokens'),
       method: 'POST',
       headers: {
         'X-Captcha': 'dummy'
@@ -194,7 +194,7 @@ describe('POST /tokens', function () {
 
   it('password grant type with valid password', function (done) {
     request({
-      uri: pot.resolve('accounts', '/apis/v/tokens'),
+      uri: pot.resolve('apis', '/v/tokens'),
       method: 'POST',
       headers: {
         'X-Captcha': 'dummy'
@@ -219,7 +219,7 @@ describe('POST /tokens', function () {
       should.exist(b.expires_in);
       b.expires_in.should.be.above(0)
       request({
-        uri: pot.resolve('accounts', '/apis/v/tokens/' + b.id),
+        uri: pot.resolve('apis', '/v/tokens/' + b.id),
         method: 'GET',
         json: true,
         auth: {
@@ -251,7 +251,7 @@ describe('POST /tokens', function () {
       username: 'unconfirmed-user'
     };
     request({
-      uri: pot.resolve('accounts', '/apis/v/users'),
+      uri: pot.resolve('apis', '/v/users'),
       method: 'POST',
       headers: {
         'X-Captcha': 'dummy'
@@ -268,7 +268,7 @@ describe('POST /tokens', function () {
       should.exist(user.email);
       user.email.should.equal(usr.email);
       request({
-        uri: pot.resolve('accounts', '/apis/v/tokens'),
+        uri: pot.resolve('apis', '/v/tokens'),
         method: 'POST',
         headers: {
           'X-Captcha': 'dummy'

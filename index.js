@@ -84,6 +84,7 @@ module.exports = function (router, done) {
   router.use(bodyParser.urlencoded({extended: true}));
 
   router.get('/:id',
+    serandi.id,
     serandi.findOne(Tokens),
     function (req, res, next) {
       model.findOne(req.ctx, function (err, token) {
@@ -112,6 +113,7 @@ module.exports = function (router, done) {
     });
 
   router.delete('/:id',
+    serandi.id,
     serandi.remove(Tokens),
     function (req, res, next) {
     model.remove(req.ctx, function (err) {
